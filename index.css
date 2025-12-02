@@ -19,7 +19,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 
 /* Sidebar Thu Gọn */
 #search-sidebar.collapsed, #replace-sidebar.collapsed {
-    width: 24px; /* Rất gọn */
+    width: 24px; 
     padding: 0;
     overflow: hidden;
 }
@@ -34,7 +34,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     display: none;
 }
 
-/* Icon Toggle (Yêu cầu 5) - Cân chỉnh chiều mũi tên */
+/* Icon Toggle */
 .sidebar-toggle-btn {
     width: 24px;
     height: 24px;
@@ -60,70 +60,31 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 #replace-sidebar.collapsed .close-icon { display: block; } /* Thu gọn: << */
 
 
-/* Action Buttons (Yêu cầu 2) - Dùng chung styles với sidebar-btn-XXX */
-.action-btn {
-    padding: 6px 10px; /* Nhỏ vừa phải */
+/* Action Buttons - Giữ nguyên styles đã khôi phục cho các nút chính */
+.action-btn-original {
+    color: white; 
+    padding: 6px 12px; 
     border-radius: 4px; 
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     transition: transform 0.1s, background-color 0.2s;
-    font-size: 11px; /* Chữ nhỏ */
+    font-size: 12px; 
     font-weight: 600; 
     text-transform: uppercase;
 }
-.action-btn:active {
+.action-btn-original:active {
     transform: scale(0.95);
 }
-/* Đổi tên class cũ thành class mới tương ứng với styles cột thay thế */
-.sidebar-btn-secondary {
-    padding: 6px 8px;
-    background: #e5e7eb;
-    color: #4b5563;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-.sidebar-btn-secondary:hover { background: #d1d5db; }
-
-.sidebar-btn-danger {
-    padding: 6px 8px;
-    background: #fecaca;
-    color: #dc2626;
-    border: 1px solid #fca5a5;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-.sidebar-btn-danger:hover { background: #fca5a5; }
-
-.sidebar-btn-info {
-    padding: 6px 8px;
-    background: #bfdbfe;
-    color: #1e40af;
-    border: 1px solid #93c5fd;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-.sidebar-btn-info:hover { background: #93c5fd; }
-
-.sidebar-btn-success {
-    padding: 6px 8px;
-    background: #a7f3d0;
-    color: #065f46;
-    border: 1px solid #6ee7b7;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-.sidebar-btn-success:hover { background: #6ee7b7; }
+.action-btn-green { background-color: #10B981; }
+.action-btn-green:hover { background-color: #059669; }
+.action-btn-red { background-color: #EF4444; }
+.action-btn-red:hover { background-color: #DC2626; }
+.action-btn-blue { background-color: #3B82F6; }
+.action-btn-blue:hover { background-color: #2563EB; }
+.action-btn-purple { background-color: #8B5CF6; }
+.action-btn-purple:hover { background-color: #7C3AED; }
 
 
-/* Input Style */
+/* Input Style chung */
 .sidebar-input-style {
     border: 1px solid #d1d5db !important;
     background-color: #f9fafb !important;
@@ -134,70 +95,82 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     box-shadow: 0 0 0 1px #3b82f6;
 }
 
-/* Match Case / Whole Word Toggle */
-.setting-toggle-btn {
-    white-space: nowrap; 
-    font-size: 11px !important;
+/* Sidebar Standard Styles (Buttons trong cột Thay Thế - Giữ nguyên) */
+.sidebar-btn-secondary {
+    padding: 6px 8px; background: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
 }
-.setting-toggle-btn.bg-green-200 { 
-    background-color: #6ee7b7 !important;
-    color: #065f46 !important;
+.sidebar-btn-secondary:hover { background: #d1d5db; }
+.sidebar-btn-danger {
+    padding: 6px 8px; background: #fecaca; color: #dc2626; border: 1px solid #fca5a5; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
 }
-.setting-toggle-btn.bg-gray-200 {
-    background-color: #e5e7eb !important;
-    color: #4b5563 !important;
+.sidebar-btn-danger:hover { background: #fca5a5; }
+.sidebar-btn-info {
+    padding: 6px 8px; background: #bfdbfe; color: #1e40af; border: 1px solid #93c5fd; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
 }
+.sidebar-btn-info:hover { background: #93c5fd; }
+.sidebar-btn-success {
+    padding: 6px 8px; background: #a7f3d0; color: #065f46; border: 1px solid #6ee7b7; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
+}
+.sidebar-btn-success:hover { background: #6ee7b7; }
 
 
-/* EDITOR STYLES */
-#editor {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #333;
-    white-space: pre-wrap !important; 
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    display: block;
+/* --- HOÀN NGUYÊN CẶP TÌM/THAY THẾ (YÊU CẦU CỤ THỂ) --- */
+.punctuation-item {
+    display: flex;
+    gap: 5px; 
+    align-items: center;
 }
 
-#editor:empty::before {
-    content: attr(data-placeholder);
-    color: #9ca3af;
-    pointer-events: none;
-    display: block;
+.punctuation-item .find,
+.punctuation-item .replace {
+    /* Đảm bảo style input gốc, không dùng style chung của sidebar */
+    flex-grow: 1;
+    padding: 4px 8px; /* Nhỏ hơn so với input chung */
+    border: 1px solid #ccc; /* Border cổ điển */
+    border-radius: 3px; 
+    font-size: 12px;
+    background-color: white; 
+    transition: border-color 0.2s;
 }
 
+.punctuation-item .find:focus,
+.punctuation-item .replace:focus {
+    border-color: #3498db; /* Focus color nổi bật */
+    outline: none;
+    box-shadow: 0 0 3px rgba(52, 152, 219, 0.5); 
+}
 
-/* HIGHLIGHT STYLES - giữ nguyên */
-.replaced {
-    background-color: #fde047;
-    color: black;
+.punctuation-item .remove-pair {
+    /* Nút xóa X cổ điển */
+    background: #e74c3c;
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    line-height: 1;
     border-radius: 3px;
-    padding: 0 2px;
-    border-bottom: 2px solid #ca8a04;
-    transition: background-color 0.3s;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 0;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
 }
-.keyword {
-    border-radius: 3px;
-    padding: 0 2px;
-    font-weight: 600;
+
+.punctuation-item .remove-pair:hover {
+    background: #c0392b;
 }
-.hl-pink   { background-color: #f9a8d4; border-bottom: 2px solid #db2777; }
-.hl-blue   { background-color: #93c5fd; border-bottom: 2px solid #2563eb; }
-.hl-green  { background-color: #86efac; border-bottom: 2px solid #16a34a; }
-.hl-orange { background-color: #fdba74; border-bottom: 2px solid #ea580c; }
-.hl-purple { background-color: #d8b4fe; border-bottom: 2px solid #9333ea; }
-.hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
 
-
-/* Blinking DONATE (Yêu cầu 4) - Tăng độ đậm và tần suất nhấp nháy */
+/* Blinking DONATE - Giữ nguyên */
 .donate-blink {
-    animation: blinker 0.5s ease-in-out infinite alternate; 
+    animation: donate-pulse 2s ease-in-out infinite alternate; 
     font-weight: 700;
-    text-shadow: 0 0 2px rgba(255, 0, 0, 0.5); /* Tạo hiệu ứng chữ nổi bật */
+    position: relative;
+    z-index: 10;
 }
 
-@keyframes blinker {
-    from { opacity: 1; transform: scale(1); background-color: #fee2e2; border-color: #f87171; } /* Đỏ nhạt hơn */
-    to { opacity: 0.7; transform: scale(1.01); background-color: #ef4444; border-color: #b91c1c; } /* Đỏ đậm hơn */
+@keyframes donate-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 4px 2px rgba(255, 0, 0, 0.4); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
 }

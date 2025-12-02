@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT HANDLERS ---
     
-    // 1. ADD KEYWORDS LOGIC 
+    // 1. ADD KEYWORDS LOGIC (Fix lỗi Enter/Blur)
     function addKw() {
         const raw = els.input.value;
         if (!raw.trim()) return;
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addedCount > 0) highlightKeywords();
     }
 
-    // Xử lý phím Enter
+    // Fix: Xử lý phím Enter
     els.input.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault(); 
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ấn ra ngoài (Blur) cũng thêm từ
+    // Fix: Ấn ra ngoài (Blur) cũng thêm từ
     els.input.addEventListener('blur', addKw);
 
     function renderTag(txt) {
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         els.tags.appendChild(tag);
     }
 
-    // Nút Search tự động thêm từ đang nhập dở
+    // Fix: Nút Search tự động thêm từ đang nhập dở
     els.search.onclick = () => {
         addKw(); // Thêm từ đang nằm trong ô input trước
         if (!state.keywords.length) return notify('Chưa nhập từ khóa!', 'error');
@@ -337,23 +337,42 @@ document.addEventListener('DOMContentLoaded', () => {
     els.matchCase.onchange = highlightKeywords;
     els.wholeWords.onchange = highlightKeywords;
 
-    // --- SIDEBAR TOGGLE LOGIC ---
+    // --- SIDEBAR TOGGLE LOGIC (Yêu cầu 1, 5) ---
     function toggleSidebar(sidebarEl, buttonEl) {
+        // Thay vì toggle 'collapsed', dùng toggle 'sidebar-open' để kiểm soát
         sidebarEl.classList.toggle('sidebar-open');
         const isOpen = sidebarEl.classList.contains('sidebar-open');
         
+        // Cập nhật class 'collapsed' để CSS áp dụng width
         if (isOpen) {
             sidebarEl.classList.remove('collapsed');
         } else {
             sidebarEl.classList.add('collapsed');
+        }
+
+        const openIcon = buttonEl.querySelector('.open-icon');
+        const closeIcon = buttonEl.querySelector('.close-icon');
+
+        if (isOpen) {
+            openIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        } else {
+            openIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
         }
     }
 
     els.toggleSearch.onclick = () => toggleSidebar(els.searchSidebar, els.toggleSearch);
     els.toggleReplace.onclick = () => toggleSidebar(els.replaceSidebar, els.toggleReplace);
 
+    // Mặc định thu gọn cả hai sidebar khi khởi động (chỉ cho lần đầu chạy)
+    // if (!localStorage.getItem('sidebar_initial_run')) {
+    //     els.searchSidebar.classList.add('collapsed');
+    //     els.replaceSidebar.classList.add('collapsed');
+    //     localStorage.setItem('sidebar_initial_run', 'true');
+    // }
     // Khởi tạo trạng thái ban đầu của icons:
-    toggleSidebar(els.searchSidebar, els.toggleSearch); 
+    toggleSidebar(els.searchSidebar, els.toggleSearch); // Gọi 2 lần để đảm bảo cả DOM và CSS đều ở trạng thái mở ban đầu
     toggleSidebar(els.replaceSidebar, els.toggleReplace);
     toggleSidebar(els.searchSidebar, els.toggleSearch);
     toggleSidebar(els.replaceSidebar, els.toggleReplace);
@@ -372,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.modes = { 'Mặc định': { pairs: [], case: false, wholeWord: false } };
         }
         
+        // Đảm bảo tất cả mode có đủ trường
         Object.keys(state.modes).forEach(k => {
             if (typeof state.modes[k].wholeWord === 'undefined') {
                 state.modes[k].wholeWord = false;
@@ -402,19 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const mode = state.modes[state.activeMode];
 
-        // Cập nhật Match Case 
+        // Cập nhật Match Case (Yêu cầu 6)
         els.caseMode.textContent = mode.case ? 'Match Case: BẬT' : 'Match Case: TẮT';
-        els.caseMode.classList.toggle('bg-green-200', mode.case);
-        els.caseMode.classList.toggle('text-green-800', mode.case);
-        els.caseMode.classList.toggle('bg-gray-200', !mode.case);
-        els.caseMode.classList.toggle('text-gray-600', !mode.case);
+        els.caseMode.className = mode.case ? 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors setting-toggle-btn bg-green-200 text-green-800' : 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors setting-toggle-btn bg-gray-200 text-gray-600';
 
-        // Cập nhật Whole Words 
+        // Cập nhật Whole Words (Yêu cầu 6)
         els.wholeWordsMode.textContent = mode.wholeWord ? 'Whole Words: BẬT' : 'Whole Words: TẮT';
-        els.wholeWordsMode.classList.toggle('bg-green-200', mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('text-green-800', mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('bg-gray-200', !mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('text-gray-600', !mode.wholeWord);
+        els.wholeWordsMode.className = mode.wholeWord ? 'w-full py-1.5 rounded text-xs font-bold transition-colors setting-toggle-btn bg-green-200 text-green-800' : 'w-full py-1.5 rounded text-xs font-bold transition-colors setting-toggle-btn bg-gray-200 text-gray-600';
         
         els.puncList.innerHTML = '';
         if (mode.pairs) {
@@ -425,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function addPairUI(f = '', r = '', append = false) {
         const div = document.createElement('div');
         div.className = 'punctuation-item';
-        // Sử dụng HTML gốc, không cần class Tailwind
         div.innerHTML = `<input type="text" class="find" placeholder="Tìm" value="${f.replace(/"/g, '&quot;')}"><span class="text-gray-400">→</span><input type="text" class="replace" placeholder="Thay" value="${r.replace(/"/g, '&quot;')}"><button class="remove-pair" tabindex="-1">×</button>`;
         div.querySelector('.remove-pair').onclick = () => div.remove();
         

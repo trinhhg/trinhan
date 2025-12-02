@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     els.matchCase.onchange = highlightKeywords;
     els.wholeWords.onchange = highlightKeywords;
 
-    // --- SIDEBAR TOGGLE LOGIC (Yêu cầu 5) ---
+    // --- SIDEBAR TOGGLE LOGIC ---
     function toggleSidebar(sidebarEl, buttonEl) {
         sidebarEl.classList.toggle('sidebar-open');
         const isOpen = sidebarEl.classList.contains('sidebar-open');
@@ -347,15 +347,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             sidebarEl.classList.add('collapsed');
         }
-
-        // CSS đã được điều chỉnh để xử lý hiển thị icon
     }
 
     els.toggleSearch.onclick = () => toggleSidebar(els.searchSidebar, els.toggleSearch);
     els.toggleReplace.onclick = () => toggleSidebar(els.replaceSidebar, els.toggleReplace);
 
     // Khởi tạo trạng thái ban đầu của icons:
-    toggleSidebar(els.searchSidebar, els.toggleSearch); // Gọi 2 lần để đảo về trạng thái Mở
+    toggleSidebar(els.searchSidebar, els.toggleSearch); 
     toggleSidebar(els.replaceSidebar, els.toggleReplace);
     toggleSidebar(els.searchSidebar, els.toggleSearch);
     toggleSidebar(els.replaceSidebar, els.toggleReplace);
@@ -427,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addPairUI(f = '', r = '', append = false) {
         const div = document.createElement('div');
         div.className = 'punctuation-item';
+        // Sử dụng HTML gốc, không cần class Tailwind
         div.innerHTML = `<input type="text" class="find" placeholder="Tìm" value="${f.replace(/"/g, '&quot;')}"><span class="text-gray-400">→</span><input type="text" class="replace" placeholder="Thay" value="${r.replace(/"/g, '&quot;')}"><button class="remove-pair" tabindex="-1">×</button>`;
         div.querySelector('.remove-pair').onclick = () => div.remove();
         

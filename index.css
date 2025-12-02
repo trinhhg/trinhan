@@ -8,16 +8,19 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-/* SIDEBAR COLLAPSE STYLES */
+/* --- SIDEBAR & BUTTON STYLES (Yêu cầu 1, 2, 5, 6) --- */
+
+/* Sidebar Base */
 #search-sidebar, #replace-sidebar {
-    display: flex; /* Bắt buộc để flex-shrink/width hoạt động */
-    width: 20%; /* Mặc định */
+    display: flex; 
+    width: 20%; 
     transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
 
+/* Sidebar Thu Gọn (Yêu cầu 1, 5) */
 #search-sidebar.collapsed, #replace-sidebar.collapsed {
-    width: 45px; /* Chiều rộng thu gọn */
-    padding: 10px 0;
+    width: 24px; /* Rất gọn */
+    padding: 0;
     overflow: hidden;
 }
 
@@ -26,15 +29,32 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     display: none;
 }
 
+#search-sidebar.collapsed h2,
+#replace-sidebar.collapsed h2 {
+    display: none;
+}
+
+/* Icon Toggle (Yêu cầu 5) */
+.sidebar-toggle-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    position: relative;
+    top: -2px; /* Cân chỉnh */
+}
 #search-sidebar.collapsed .open-icon,
 #replace-sidebar.collapsed .close-icon {
     display: block !important;
-    transform: rotate(0deg); /* Biểu tượng mở */
 }
 
 #search-sidebar .close-icon,
 #replace-sidebar .open-icon {
-    display: block; /* Biểu tượng đóng */
+    display: block; 
 }
 
 #search-sidebar.collapsed .close-icon,
@@ -42,10 +62,104 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     display: none;
 }
 
-#search-sidebar.collapsed h2,
-#replace-sidebar.collapsed h2 {
-    display: none;
+
+/* Action Buttons (Yêu cầu 2, 3) */
+.action-btn {
+    color: white; 
+    padding: 6px 12px; /* Nhỏ vừa phải */
+    border-radius: 4px; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: transform 0.1s, background-color 0.2s;
+    font-size: 12px; /* Chữ nhỏ */
+    font-weight: 600; 
+    text-transform: uppercase;
 }
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+/* Sidebar Standard Styles (Yêu cầu 2) */
+.sidebar-input-style {
+    border: 1px solid #d1d5db !important;
+    background-color: #f9fafb !important;
+}
+.sidebar-input-style:focus {
+    border-color: #3b82f6 !important;
+    background-color: white !important;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.sidebar-btn-secondary {
+    padding: 6px 8px;
+    background: #e5e7eb;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.sidebar-btn-secondary:hover {
+    background: #d1d5db;
+}
+
+.sidebar-btn-danger {
+    padding: 6px 8px;
+    background: #fecaca;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.sidebar-btn-danger:hover {
+    background: #fca5a5;
+}
+
+.sidebar-btn-info {
+    padding: 6px 8px;
+    background: #bfdbfe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.sidebar-btn-info:hover {
+    background: #93c5fd;
+}
+
+.sidebar-btn-success {
+    padding: 6px 8px;
+    background: #a7f3d0;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.sidebar-btn-success:hover {
+    background: #6ee7b7;
+}
+
+/* Match Case / Whole Word Toggle (Yêu cầu 6) */
+.setting-toggle-btn {
+    /* Đảm bảo chữ nhỏ gọn hơn */
+    white-space: nowrap; 
+    font-size: 11px !important;
+}
+.setting-toggle-btn.bg-green-200 { /* Tăng độ tương phản khi BẬT */
+    background-color: #6ee7b7 !important;
+    color: #065f46 !important;
+}
+.setting-toggle-btn.bg-gray-200 {
+    background-color: #e5e7eb !important;
+    color: #4b5563 !important;
+}
+
 
 /* EDITOR STYLES */
 #editor {
@@ -66,6 +180,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 }
 
 /* HIGHLIGHT STYLES */
+/* (Giữ nguyên phần highlight) */
 .replaced {
     background-color: #fde047;
     color: black;
@@ -89,6 +204,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 .hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
 
 /* TAGS & UI */
+/* (Giữ nguyên Tags và Punctuation List) */
 #keywords-tags .tag {
     background: linear-gradient(to bottom right, #eff6ff, #dbeafe);
     color: #1e40af; padding: 4px 10px; border-radius: 20px;
@@ -119,11 +235,12 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 }
 #punctuation-list .punctuation-item button.remove-pair:hover { background: #ef4444; color: white; }
 
-/* NOTIFICATIONS - FIX WHITE POPUP */
+/* NOTIFICATIONS */
+/* (Giữ nguyên Notifications) */
 #notification-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .notification {
     padding: 12px 20px; border-radius: 8px; 
-    color: #fff !important; /* Chữ trắng bắt buộc */
+    color: #fff !important; 
     background-color: #333; 
     font-size: 13px; font-weight: 600;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
@@ -137,13 +254,12 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 
 .hidden { display: none !important; }
 
-/* Blinking DONATE */
+/* Blinking DONATE (Yêu cầu 4) */
 .donate-blink {
-    animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+    animation: blinker 1.5s cubic-bezier(.5, 0, 1, 1) infinite alternate; /* Tăng thời gian nhấp nháy để nổi bật */
 }
 
 @keyframes blinker {
-    from { opacity: 1; }
-    to { opacity: 0.5; }
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.8; transform: scale(1.02); }
 }
-

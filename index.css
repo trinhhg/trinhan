@@ -8,7 +8,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-/* --- SIDEBAR & BUTTON STYLES --- */
+/* --- SIDEBAR & BUTTON STYLES (Yêu cầu 1, 2, 5, 6) --- */
 
 /* Sidebar Base */
 #search-sidebar, #replace-sidebar {
@@ -17,9 +17,9 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
 
-/* Sidebar Thu Gọn */
+/* Sidebar Thu Gọn (Yêu cầu 1, 5) */
 #search-sidebar.collapsed, #replace-sidebar.collapsed {
-    width: 24px; 
+    width: 24px; /* Rất gọn */
     padding: 0;
     overflow: hidden;
 }
@@ -34,7 +34,7 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     display: none;
 }
 
-/* Icon Toggle */
+/* Icon Toggle (Yêu cầu 5) */
 .sidebar-toggle-btn {
     width: 24px;
     height: 24px;
@@ -45,46 +45,40 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     font-size: 1.5rem;
     line-height: 1;
     position: relative;
-    top: -2px; 
+    top: -2px; /* Cân chỉnh */
 }
-/* Sidebar Trái (Search) */
-#search-sidebar .open-icon { display: block; } /* Mở: << */
-#search-sidebar .close-icon { display: none; }
-#search-sidebar.collapsed .open-icon { display: none; }
-#search-sidebar.collapsed .close-icon { display: block; } /* Thu gọn: >> */
+#search-sidebar.collapsed .open-icon,
+#replace-sidebar.collapsed .close-icon {
+    display: block !important;
+}
 
-/* Sidebar Phải (Replace) */
-#replace-sidebar .open-icon { display: block; } /* Mở: >> */
-#replace-sidebar .close-icon { display: none; }
-#replace-sidebar.collapsed .open-icon { display: none; }
-#replace-sidebar.collapsed .close-icon { display: block; } /* Thu gọn: << */
+#search-sidebar .close-icon,
+#replace-sidebar .open-icon {
+    display: block; 
+}
+
+#search-sidebar.collapsed .close-icon,
+#replace-sidebar.collapsed .open-icon {
+    display: none;
+}
 
 
-/* Action Buttons - Giữ nguyên styles đã khôi phục cho các nút chính */
-.action-btn-original {
+/* Action Buttons (Yêu cầu 2, 3) */
+.action-btn {
     color: white; 
-    padding: 6px 12px; 
+    padding: 6px 12px; /* Nhỏ vừa phải */
     border-radius: 4px; 
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     transition: transform 0.1s, background-color 0.2s;
-    font-size: 12px; 
+    font-size: 12px; /* Chữ nhỏ */
     font-weight: 600; 
     text-transform: uppercase;
 }
-.action-btn-original:active {
+.action-btn:active {
     transform: scale(0.95);
 }
-.action-btn-green { background-color: #10B981; }
-.action-btn-green:hover { background-color: #059669; }
-.action-btn-red { background-color: #EF4444; }
-.action-btn-red:hover { background-color: #DC2626; }
-.action-btn-blue { background-color: #3B82F6; }
-.action-btn-blue:hover { background-color: #2563EB; }
-.action-btn-purple { background-color: #8B5CF6; }
-.action-btn-purple:hover { background-color: #7C3AED; }
 
-
-/* Input Style chung */
+/* Sidebar Standard Styles (Yêu cầu 2) */
 .sidebar-input-style {
     border: 1px solid #d1d5db !important;
     background-color: #f9fafb !important;
@@ -95,82 +89,177 @@ body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow
     box-shadow: 0 0 0 1px #3b82f6;
 }
 
-/* Sidebar Standard Styles (Buttons trong cột Thay Thế - Giữ nguyên) */
 .sidebar-btn-secondary {
-    padding: 6px 8px; background: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
+    padding: 6px 8px;
+    background: #e5e7eb;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
-.sidebar-btn-secondary:hover { background: #d1d5db; }
+.sidebar-btn-secondary:hover {
+    background: #d1d5db;
+}
+
 .sidebar-btn-danger {
-    padding: 6px 8px; background: #fecaca; color: #dc2626; border: 1px solid #fca5a5; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
+    padding: 6px 8px;
+    background: #fecaca;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
-.sidebar-btn-danger:hover { background: #fca5a5; }
+.sidebar-btn-danger:hover {
+    background: #fca5a5;
+}
+
 .sidebar-btn-info {
-    padding: 6px 8px; background: #bfdbfe; color: #1e40af; border: 1px solid #93c5fd; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
+    padding: 6px 8px;
+    background: #bfdbfe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
-.sidebar-btn-info:hover { background: #93c5fd; }
+.sidebar-btn-info:hover {
+    background: #93c5fd;
+}
+
 .sidebar-btn-success {
-    padding: 6px 8px; background: #a7f3d0; color: #065f46; border: 1px solid #6ee7b7; border-radius: 4px; font-size: 11px; font-weight: 600; transition: background-color 0.2s;
+    padding: 6px 8px;
+    background: #a7f3d0;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
-.sidebar-btn-success:hover { background: #6ee7b7; }
-
-
-/* --- HOÀN NGUYÊN CẶP TÌM/THAY THẾ (YÊU CẦU CỤ THỂ) --- */
-.punctuation-item {
-    display: flex;
-    gap: 5px; 
-    align-items: center;
+.sidebar-btn-success:hover {
+    background: #6ee7b7;
 }
 
-.punctuation-item .find,
-.punctuation-item .replace {
-    /* Đảm bảo style input gốc, không dùng style chung của sidebar */
-    flex-grow: 1;
-    padding: 4px 8px; /* Nhỏ hơn so với input chung */
-    border: 1px solid #ccc; /* Border cổ điển */
-    border-radius: 3px; 
-    font-size: 12px;
-    background-color: white; 
+/* Match Case / Whole Word Toggle (Yêu cầu 6) */
+.setting-toggle-btn {
+    /* Đảm bảo chữ nhỏ gọn hơn */
+    white-space: nowrap; 
+    font-size: 11px !important;
+}
+.setting-toggle-btn.bg-green-200 { /* Tăng độ tương phản khi BẬT */
+    background-color: #6ee7b7 !important;
+    color: #065f46 !important;
+}
+.setting-toggle-btn.bg-gray-200 {
+    background-color: #e5e7eb !important;
+    color: #4b5563 !important;
+}
+
+
+/* EDITOR STYLES */
+#editor {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap !important; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: block;
+}
+
+#editor:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    display: block;
+}
+
+/* HIGHLIGHT STYLES */
+/* (Giữ nguyên phần highlight) */
+.replaced {
+    background-color: #fde047;
+    color: black;
+    border-radius: 3px;
+    padding: 0 2px;
+    border-bottom: 2px solid #ca8a04;
+    transition: background-color 0.3s;
+}
+
+.keyword {
+    border-radius: 3px;
+    padding: 0 2px;
+    font-weight: 600;
+}
+
+.hl-pink   { background-color: #f9a8d4; border-bottom: 2px solid #db2777; }
+.hl-blue   { background-color: #93c5fd; border-bottom: 2px solid #2563eb; }
+.hl-green  { background-color: #86efac; border-bottom: 2px solid #16a34a; }
+.hl-orange { background-color: #fdba74; border-bottom: 2px solid #ea580c; }
+.hl-purple { background-color: #d8b4fe; border-bottom: 2px solid #9333ea; }
+.hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
+
+/* TAGS & UI */
+/* (Giữ nguyên Tags và Punctuation List) */
+#keywords-tags .tag {
+    background: linear-gradient(to bottom right, #eff6ff, #dbeafe);
+    color: #1e40af; padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #93c5fd; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    margin-right: 4px; 
+    margin-bottom: 4px;
+}
+#keywords-tags .tag:hover { background: #bfdbfe; transform: translateY(-1px); }
+#keywords-tags .tag .remove-tag {
+    cursor: pointer; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: rgba(255,255,255,0.5); font-size: 14px;
+}
+#keywords-tags .tag .remove-tag:hover { background: white; color: red; }
+
+#punctuation-list .punctuation-item {
+    display: flex; gap: 4px; align-items: center; background: white; padding: 4px; border: 1px solid #eee; border-radius: 4px;
+}
+#punctuation-list .punctuation-item input {
+    flex: 1; min-width: 0; padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 3px;
     transition: border-color 0.2s;
 }
-
-.punctuation-item .find:focus,
-.punctuation-item .replace:focus {
-    border-color: #3498db; /* Focus color nổi bật */
-    outline: none;
-    box-shadow: 0 0 3px rgba(52, 152, 219, 0.5); 
+#punctuation-list .punctuation-item input:focus { border-color: #3b82f6; outline: none; }
+#punctuation-list .punctuation-item button.remove-pair {
+    width: 24px; height: 24px; flex-shrink: 0; background: #fee2e2; color: #dc2626; border: none;
+    border-radius: 4px; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center;
 }
+#punctuation-list .punctuation-item button.remove-pair:hover { background: #ef4444; color: white; }
 
-.punctuation-item .remove-pair {
-    /* Nút xóa X cổ điển */
-    background: #e74c3c;
-    color: white;
-    border: none;
-    width: 20px;
-    height: 20px;
-    line-height: 1;
-    border-radius: 3px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 0;
-    transition: background-color 0.2s;
-    flex-shrink: 0;
+/* NOTIFICATIONS */
+/* (Giữ nguyên Notifications) */
+#notification-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.notification {
+    padding: 12px 20px; border-radius: 8px; 
+    color: #fff !important; 
+    background-color: #333; 
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; align-items: center; min-width: 200px;
 }
+.notification.success { background: #10b981 !important; border-left: 4px solid #065f46; }
+.notification.error { background: #ef4444 !important; border-left: 4px solid #7f1d1d; }
 
-.punctuation-item .remove-pair:hover {
-    background: #c0392b;
-}
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-/* Blinking DONATE - Giữ nguyên */
+.hidden { display: none !important; }
+
+/* Blinking DONATE (Yêu cầu 4) */
 .donate-blink {
-    animation: donate-pulse 2s ease-in-out infinite alternate; 
-    font-weight: 700;
-    position: relative;
-    z-index: 10;
+    animation: blinker 1.5s cubic-bezier(.5, 0, 1, 1) infinite alternate; /* Tăng thời gian nhấp nháy để nổi bật */
 }
 
-@keyframes donate-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-    50% { transform: scale(1.02); box-shadow: 0 0 4px 2px rgba(255, 0, 0, 0.4); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+@keyframes blinker {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.8; transform: scale(1.02); }
 }

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         delMode: document.getElementById('delete-mode-btn'),
         renameMode: document.getElementById('rename-mode'),
         caseMode: document.getElementById('match-case-replace'),
-        wholeWordsMode: document.getElementById('whole-words-replace'), // Thêm Whole Words
+        wholeWordsMode: document.getElementById('whole-words-replace'), 
         puncList: document.getElementById('punctuation-list'),
         addPair: document.getElementById('add-pair'),
         save: document.getElementById('save-settings'),
@@ -104,12 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const caseSensitive = els.matchCase.checked;
             const isWholeWord = els.wholeWords.checked;
 
-            // Dùng RegExp chuẩn Unicode cho tiếng Việt
             let wordCharRegex;
             try {
                 wordCharRegex = /[\p{L}\p{N}_]/u; 
             } catch (e) {
-                // Fallback nếu browser quá cũ
                 wordCharRegex = /[a-zA-Z0-9àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýđ_]/i;
             }
 
@@ -133,12 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const charBefore = idx > 0 ? nodeText[idx-1] : '';
                                 const charAfter = idx + mw.length < nodeText.length ? nodeText[idx+mw.length] : '';
                                 
-                                // Kiểm tra nếu ký tự trước HOẶC ký tự sau là một ký tự từ (word character)
                                 if (wordCharRegex.test(charBefore) || wordCharRegex.test(charAfter)) {
                                     continue; 
                                 }
                             }
-                            // Cập nhật tìm thấy ngắn nhất, nhưng ưu tiên từ dài nhất
                             if (foundIdx === -1 || idx < foundIdx) {
                                 foundIdx = idx; foundWord = w; colorIdx = i;
                             }
@@ -174,13 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!mode.pairs.length) return notify('Chưa có từ khóa để thay thế!', 'error');
         if (!els.editor.textContent.trim()) return notify('Văn bản trống!', 'error');
 
-        unwrapClasses(['keyword', 'replaced']); // Unwrap cả keyword và replaced trước khi thay thế
+        unwrapClasses(['keyword', 'replaced']); 
         const caseSensitive = mode.case;
-        const isWholeWord = mode.wholeWord; // Lấy từ mode
+        const isWholeWord = mode.wholeWord;
         const pairs = [...mode.pairs].sort((a, b) => b.find.length - a.find.length);
         let count = 0;
 
-        // Dùng RegExp chuẩn Unicode cho tiếng Việt
         let wordCharRegex;
         try {
             wordCharRegex = /[\p{L}\p{N}_]/u; 
@@ -193,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const toWord = pair.replace;
             if(!fromWord) return;
 
-            // Chỉ thay thế trên các nodes chưa bị thay thế
             const nodes = getTextNodesSnapshot(els.editor, { skipClass1: 'replaced' });
 
             for (const textNode of nodes) {
@@ -207,14 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (idx === -1) break;
 
-                    // Kiểm tra Whole Word (Từ hoàn chỉnh)
+                    // Kiểm tra Whole Word
                     if (isWholeWord) {
                         const charBefore = idx > 0 ? nodeText[idx-1] : '';
                         const charAfter = idx + searchFor.length < nodeText.length ? nodeText[idx+searchFor.length] : '';
                         
-                        // Nếu ký tự trước HOẶC ký tự sau là một ký tự từ, bỏ qua (không phải từ hoàn chỉnh)
                         if (wordCharRegex.test(charBefore) || wordCharRegex.test(charAfter)) {
-                             // Tiếp tục tìm kiếm sau vị trí này + 1 để tránh loop vô hạn
                             const afterMatch = node.nodeValue.substring(idx + 1);
                             node = node.splitText(idx + 1);
                             node.nodeValue = afterMatch;
@@ -228,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let finalReplace = toWord;
                     const prefix = node.nodeValue;
                     
-                    // Logic tự động viết hoa chữ cái đầu (nếu là đầu dòng hoặc sau dấu chấm/hỏi/chấm than)
+                    // Logic tự động viết hoa chữ cái đầu
                     const isStartOfLine = /^\s*$/.test(prefix) || /\n\s*$/.test(prefix);
                     const isAfterPunctuation = /([\.?!])\s*$/.test(prefix);
 
@@ -281,15 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addedCount > 0) highlightKeywords();
     }
 
-    // Fix: Xử lý phím Enter để tạo tag mới (Yêu cầu 3)
+    // Fix: Xử lý phím Enter
     els.input.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault(); // Ngăn xuống dòng
+            e.preventDefault(); 
             addKw();
         }
     });
 
-    // Fix: Ấn ra ngoài (Blur) cũng thêm từ (Yêu cầu 3)
+    // Fix: Ấn ra ngoài (Blur) cũng thêm từ
     els.input.addEventListener('blur', addKw);
 
     function renderTag(txt) {
@@ -304,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         els.tags.appendChild(tag);
     }
 
-    // Fix: Nút Search tự động thêm từ đang nhập dở (Yêu cầu 3)
+    // Fix: Nút Search tự động thêm từ đang nhập dở
     els.search.onclick = () => {
         addKw(); // Thêm từ đang nằm trong ô input trước
         if (!state.keywords.length) return notify('Chưa nhập từ khóa!', 'error');
@@ -345,25 +337,46 @@ document.addEventListener('DOMContentLoaded', () => {
     els.matchCase.onchange = highlightKeywords;
     els.wholeWords.onchange = highlightKeywords;
 
-    // --- SIDEBAR TOGGLE LOGIC (Yêu cầu 4) ---
+    // --- SIDEBAR TOGGLE LOGIC (Yêu cầu 1, 5) ---
     function toggleSidebar(sidebarEl, buttonEl) {
-        sidebarEl.classList.toggle('collapsed');
-        const isOpen = !sidebarEl.classList.contains('collapsed');
+        // Thay vì toggle 'collapsed', dùng toggle 'sidebar-open' để kiểm soát
+        sidebarEl.classList.toggle('sidebar-open');
+        const isOpen = sidebarEl.classList.contains('sidebar-open');
         
+        // Cập nhật class 'collapsed' để CSS áp dụng width
+        if (isOpen) {
+            sidebarEl.classList.remove('collapsed');
+        } else {
+            sidebarEl.classList.add('collapsed');
+        }
+
         const openIcon = buttonEl.querySelector('.open-icon');
         const closeIcon = buttonEl.querySelector('.close-icon');
 
         if (isOpen) {
-            openIcon.classList.add('hidden');
-            closeIcon.classList.remove('hidden');
-        } else {
             openIcon.classList.remove('hidden');
             closeIcon.classList.add('hidden');
+        } else {
+            openIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
         }
     }
 
     els.toggleSearch.onclick = () => toggleSidebar(els.searchSidebar, els.toggleSearch);
     els.toggleReplace.onclick = () => toggleSidebar(els.replaceSidebar, els.toggleReplace);
+
+    // Mặc định thu gọn cả hai sidebar khi khởi động (chỉ cho lần đầu chạy)
+    // if (!localStorage.getItem('sidebar_initial_run')) {
+    //     els.searchSidebar.classList.add('collapsed');
+    //     els.replaceSidebar.classList.add('collapsed');
+    //     localStorage.setItem('sidebar_initial_run', 'true');
+    // }
+    // Khởi tạo trạng thái ban đầu của icons:
+    toggleSidebar(els.searchSidebar, els.toggleSearch); // Gọi 2 lần để đảm bảo cả DOM và CSS đều ở trạng thái mở ban đầu
+    toggleSidebar(els.replaceSidebar, els.toggleReplace);
+    toggleSidebar(els.searchSidebar, els.toggleSearch);
+    toggleSidebar(els.replaceSidebar, els.toggleReplace);
+
 
     // --- DATA MANAGEMENT ---
     function loadData() {
@@ -377,14 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {
             state.modes = { 'Mặc định': { pairs: [], case: false, wholeWord: false } };
         }
-        // Đảm bảo mode 'Mặc định' có đủ trường wholeWord
-        if (!state.modes['Mặc định']) {
-             state.modes['Mặc định'] = { pairs: [], case: false, wholeWord: false };
-        } else if (typeof state.modes['Mặc định'].wholeWord === 'undefined') {
-             state.modes['Mặc định'].wholeWord = false;
-        }
-
-        // Cập nhật các mode khác nếu thiếu wholeWord
+        
+        // Đảm bảo tất cả mode có đủ trường
         Object.keys(state.modes).forEach(k => {
             if (typeof state.modes[k].wholeWord === 'undefined') {
                 state.modes[k].wholeWord = false;
@@ -415,13 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const mode = state.modes[state.activeMode];
 
-        // Cập nhật Case Mode
+        // Cập nhật Match Case (Yêu cầu 6)
         els.caseMode.textContent = mode.case ? 'Match Case: BẬT' : 'Match Case: TẮT';
-        els.caseMode.className = mode.case ? 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors bg-green-200 text-green-800' : 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600';
+        els.caseMode.className = mode.case ? 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors setting-toggle-btn bg-green-200 text-green-800' : 'w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors setting-toggle-btn bg-gray-200 text-gray-600';
 
-        // Cập nhật Whole Words Mode (Yêu cầu 1)
+        // Cập nhật Whole Words (Yêu cầu 6)
         els.wholeWordsMode.textContent = mode.wholeWord ? 'Whole Words: BẬT' : 'Whole Words: TẮT';
-        els.wholeWordsMode.className = mode.wholeWord ? 'w-full py-1.5 rounded text-xs font-bold transition-colors bg-green-200 text-green-800' : 'w-full py-1.5 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600';
+        els.wholeWordsMode.className = mode.wholeWord ? 'w-full py-1.5 rounded text-xs font-bold transition-colors setting-toggle-btn bg-green-200 text-green-800' : 'w-full py-1.5 rounded text-xs font-bold transition-colors setting-toggle-btn bg-gray-200 text-gray-600';
         
         els.puncList.innerHTML = '';
         if (mode.pairs) {
@@ -482,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
-                    // Regex tìm kiếm linh hoạt hơn cho 3/4/5 cột
                     const match = line.match(/^"(.*)","(.*)","(.*)"(?:,(\w+)(?:,(\w+))?)?$/);
                     if (match) {
                         const find = match[1].replace(/""/g, '"');
@@ -493,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         if (!state.modes[modeName]) state.modes[modeName] = { pairs: [], case: false, wholeWord: false };
                         
-                        // Chỉ cập nhật setting mode ở dòng đầu tiên của mode đó
+                        // Cập nhật setting mode ở dòng đầu tiên của mode đó
                         if (i === 1 || !state.modes[modeName].pairs.length) {
                              state.modes[modeName].case = (caseStr === 'TRUE');
                              state.modes[modeName].wholeWord = (wholeWordStr === 'TRUE');
@@ -529,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     // Toggle Match Case
     els.caseMode.onclick = () => { state.modes[state.activeMode].case = !state.modes[state.activeMode].case; updateModeUI(); };
-    // Toggle Whole Words (Yêu cầu 1)
+    // Toggle Whole Words 
     els.wholeWordsMode.onclick = () => { state.modes[state.activeMode].wholeWord = !state.modes[state.activeMode].wholeWord; updateModeUI(); };
 
     // Khởi tạo

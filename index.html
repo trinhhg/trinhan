@@ -40,14 +40,14 @@
                       </select>
                   </div>
               </div>
-              <div class="mb-4 space-y-2 flex items-center justify-between"> 
+              <div class="mb-4 space-y-2 flex gap-4 items-center">
                   <label class="flex items-center cursor-pointer p-1 rounded">
-                      <input type="checkbox" id="matchCase" class="mr-1 form-checkbox h-3.5 w-3.5 text-blue-600"> 
-                      <span class="text-xs font-semibold whitespace-nowrap">Case</span>
+                      <input type="checkbox" id="matchCase" class="mr-2 form-checkbox h-4 w-4 text-blue-600"> 
+                      <span class="text-xs font-semibold whitespace-nowrap">Match Case</span>
                   </label>
                   <label class="flex items-center cursor-pointer p-1 rounded">
-                      <input type="checkbox" id="wholeWords" class="mr-1 form-checkbox h-3.5 w-3.5 text-blue-600"> 
-                      <span class="text-xs font-semibold whitespace-nowrap">Whole Word</span>
+                      <input type="checkbox" id="wholeWords" class="mr-2 form-checkbox h-4 w-4 text-blue-600"> 
+                      <span class="text-xs font-semibold whitespace-nowrap">Từ hoàn chỉnh</span>
                   </label>
               </div>
               <div class="mb-4">
@@ -61,23 +61,19 @@
 
       <div id="editor-area" class="flex-1 p-4 bg-gray-50 flex flex-col overflow-hidden relative transition-all duration-300">
           <div class="flex flex-col mb-2 px-2">
-              <div class="flex justify-between items-center mb-1">
-                  <h2 class="text-lg font-bold text-gray-800">Nội Dung Chương</h2>
-                  
+              <div class="flex justify-between items-end">
+                  <h2 class="text-xl font-bold text-gray-800">Nội Dung Chương</h2>
                   <div class="text-xs text-gray-600">Góp ý: <a href="https://www.facebook.com/trinh.hg.57" target="_blank" class="font-bold text-blue-600 hover:underline">fb.com/trinh.hg.57</a></div>
               </div>
               
-              <div class="flex justify-between items-center pt-1 border-t">
-                  
-                  <div id="editor-actions" class="flex gap-2 flex-shrink-0">
-                      <button id="search" class="action-btn-original action-btn-green">Tìm</button>
-                      <button id="clear" class="action-btn-original action-btn-red">Xóa</button>
-                      <button id="copy-editor-content" class="action-btn-original action-btn-blue">Copy</button>
-                      <button id="replace-all" class="action-btn-original action-btn-purple">Thay Thế</button>
-                  </div>
+              <div class="flex justify-between items-center mt-2 border-t pt-2">
+                  <div class="donate-blink font-bold bg-red-600 text-white px-3 py-1 rounded shadow-lg text-xs border-2 border-yellow-300 cursor-pointer">DON@TE: MB BANK - TRINH THI XUAN HUONG - 0917678211</div>
 
-                  <div class="donate-blink font-semibold text-white bg-red-600 px-2 py-1 rounded border border-red-800 text-xs cursor-pointer tracking-wider whitespace-nowrap overflow-hidden text-ellipsis ml-2 shadow-md">
-                      DONATE: MB BANK - TRINH THI XUAN HUONG - 0917678211
+                  <div id="editor-actions" class="flex gap-2">
+                      <button id="search" class="action-btn bg-green-600 hover:bg-green-700">Tìm</button>
+                      <button id="clear" class="action-btn bg-red-500 hover:bg-red-600">Xóa</button>
+                      <button id="copy-editor-content" class="action-btn bg-blue-500 hover:bg-blue-600">Copy</button>
+                      <button id="replace-all" class="action-btn bg-purple-600 hover:bg-purple-700">Thay Thế</button>
                   </div>
               </div>
           </div>
@@ -110,8 +106,8 @@
                       <button id="rename-mode" class="flex-1 py-1 sidebar-btn-secondary hidden">Đổi tên</button>
                       <button id="delete-mode-btn" class="flex-1 py-1 sidebar-btn-danger hidden">Xóa</button>
                   </div>
-                  <button id="match-case-replace" class="w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors setting-toggle-btn">Match Case: TẮT</button>
-                  <button id="whole-words-replace" class="w-full py-1.5 rounded text-xs font-bold transition-colors setting-toggle-btn">Whole Words: TẮT</button>
+                  <button id="match-case-replace" class="w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600 setting-toggle-btn">Match Case: TẮT</button>
+                  <button id="whole-words-replace" class="w-full py-1.5 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600 setting-toggle-btn">Whole Words: TẮT</button>
               </div>
 
               <div class="flex gap-2 mb-4">

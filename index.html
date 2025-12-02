@@ -12,10 +12,10 @@
 <body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
   <div id="main-app" class="flex flex-1 overflow-hidden">
       
-      <div id="search-sidebar" class="w-1/5 p-4 bg-white shadow-md flex-shrink-0 flex-col z-10 border-r border-gray-200 sidebar-collapsed">
+      <div id="search-sidebar" class="w-1/5 p-4 bg-white shadow-md flex-shrink-0 flex-col z-10 border-r border-gray-200 sidebar-open">
           <div class="flex justify-between items-center mb-4 border-b pb-2">
               <h2 class="text-xl font-bold text-gray-800">Tìm Kiếm</h2>
-              <button id="toggle-search-sidebar" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">
+              <button id="toggle-search-sidebar" class="sidebar-toggle-btn text-gray-500 hover:text-gray-700 text-2xl leading-none" title="Thu gọn">
                   <span class="open-icon">&laquo;</span>
                   <span class="close-icon hidden">&raquo;</span>
               </button>
@@ -23,7 +23,7 @@
           <div id="search-content" class="flex-1 overflow-y-auto pr-1 custom-scrollbar">
               <div class="mb-4 grid grid-cols-2 gap-2">
                   <div><label class="block mb-1 text-xs font-semibold">Font:</label>
-                      <select id="fontFamily" class="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-400 outline-none">
+                      <select id="fontFamily" class="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-400 outline-none sidebar-input-style">
                           <option value="Arial">Arial</option>
                           <option value="Calibri">Calibri</option>
                           <option value="'Montserrat', sans-serif" selected>Montserrat</option>
@@ -31,7 +31,7 @@
                       </select>
                   </div>
                   <div><label class="block mb-1 text-xs font-semibold">Cỡ chữ:</label>
-                      <select id="fontSize" class="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-400 outline-none">
+                      <select id="fontSize" class="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-400 outline-none sidebar-input-style">
                           <option value="14px">14</option>
                           <option value="16px" selected>16</option>
                           <option value="18px">18</option>
@@ -40,19 +40,19 @@
                       </select>
                   </div>
               </div>
-              <div class="mb-4 space-y-2 flex gap-4">
-                  <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+              <div class="mb-4 space-y-2 flex gap-4 items-center">
+                  <label class="flex items-center cursor-pointer p-1 rounded">
                       <input type="checkbox" id="matchCase" class="mr-2 form-checkbox h-4 w-4 text-blue-600"> 
-                      <span class="text-sm font-semibold">Match Case</span>
+                      <span class="text-xs font-semibold whitespace-nowrap">Match Case</span>
                   </label>
-                  <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                  <label class="flex items-center cursor-pointer p-1 rounded">
                       <input type="checkbox" id="wholeWords" class="mr-2 form-checkbox h-4 w-4 text-blue-600"> 
-                      <span class="text-sm font-semibold">Từ hoàn chỉnh</span>
+                      <span class="text-xs font-semibold whitespace-nowrap">Từ hoàn chỉnh</span>
                   </label>
               </div>
               <div class="mb-4">
                   <label class="block mb-2 text-sm font-semibold">Từ khóa:</label>
-                  <input type="text" id="keywords-input" placeholder="Nhập từ rồi Enter hoặc phẩy..." class="w-full p-2 border border-gray-300 rounded bg-gray-50 text-sm focus:bg-white focus:ring-2 focus:ring-green-400 outline-none transition-all">
+                  <input type="text" id="keywords-input" placeholder="Nhập từ rồi Enter hoặc phẩy..." class="w-full p-2 border border-gray-300 rounded bg-gray-50 text-sm focus:bg-white focus:ring-2 focus:ring-green-400 outline-none transition-all sidebar-input-style">
               </div>
 
               <div id="keywords-tags" class="flex flex-wrap gap-2 content-start min-h-[40px] border border-dashed border-gray-300 p-2 rounded"></div>
@@ -60,20 +60,21 @@
       </div>
 
       <div id="editor-area" class="flex-1 p-4 bg-gray-50 flex flex-col overflow-hidden relative transition-all duration-300">
-          <div class="flex justify-between items-center mb-2 px-2">
-              <div class="flex flex-col">
-                <h2 class="text-xl font-bold text-gray-800">Nội Dung Chương</h2>
-                <div class="text-xs space-y-1 mt-1">
-                    <div class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded border border-red-100 donate-blink inline-block">DON@TE: MB BANK - TRINH THI XUAN HUONG - 0917678211</div>
-                    <div class="text-gray-600">Góp ý: <a href="https://www.facebook.com/trinh.hg.57" target="_blank" class="font-bold text-blue-600 hover:underline">fb.com/trinh.hg.57</a></div>
-                </div>
+          <div class="flex flex-col mb-2 px-2">
+              <div class="flex justify-between items-end">
+                  <h2 class="text-xl font-bold text-gray-800">Nội Dung Chương</h2>
+                  <div class="text-xs text-gray-600">Góp ý: <a href="https://www.facebook.com/trinh.hg.57" target="_blank" class="font-bold text-blue-600 hover:underline">fb.com/trinh.hg.57</a></div>
               </div>
               
-              <div id="editor-actions" class="flex gap-2 text-sm">
-                  <button id="search" class="bg-green-600 text-white py-2 px-4 rounded shadow hover:bg-green-700 active:scale-95 transition-transform font-bold uppercase tracking-wide">Tìm</button>
-                  <button id="copy-editor-content" class="bg-blue-500 text-white py-2 px-4 rounded shadow hover:bg-blue-600 active:scale-95 transition-transform font-bold uppercase tracking-wide">Copy</button>
-                  <button id="replace-all" class="bg-purple-600 text-white py-2 px-4 rounded shadow hover:bg-purple-700 active:scale-95 transition-transform font-bold uppercase tracking-wide">Thay Thế</button>
-                  <button id="clear" class="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600 active:scale-95 transition-transform font-bold uppercase tracking-wide">Xóa</button>
+              <div class="flex justify-between items-center mt-2 border-t pt-2">
+                  <div class="donate-blink font-bold bg-red-600 text-white px-3 py-1 rounded shadow-lg text-xs border-2 border-yellow-300 cursor-pointer">DON@TE: MB BANK - TRINH THI XUAN HUONG - 0917678211</div>
+
+                  <div id="editor-actions" class="flex gap-2">
+                      <button id="search" class="action-btn bg-green-600 hover:bg-green-700">Tìm</button>
+                      <button id="clear" class="action-btn bg-red-500 hover:bg-red-600">Xóa</button>
+                      <button id="copy-editor-content" class="action-btn bg-blue-500 hover:bg-blue-600">Copy</button>
+                      <button id="replace-all" class="action-btn bg-purple-600 hover:bg-purple-700">Thay Thế</button>
+                  </div>
               </div>
           </div>
           
@@ -86,10 +87,10 @@
           </div>
       </div>
 
-      <div id="replace-sidebar" class="w-1/5 p-4 bg-white shadow-md flex-shrink-0 flex-col z-10 border-l border-gray-200 sidebar-collapsed">
+      <div id="replace-sidebar" class="w-1/5 p-4 bg-white shadow-md flex-shrink-0 flex-col z-10 border-l border-gray-200 sidebar-open">
           <div class="flex justify-between items-center mb-4 border-b pb-2">
               <h2 class="text-xl font-bold text-gray-800">Thay Thế</h2>
-              <button id="toggle-replace-sidebar" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">
+              <button id="toggle-replace-sidebar" class="sidebar-toggle-btn text-gray-500 hover:text-gray-700 text-2xl leading-none" title="Thu gọn">
                   <span class="open-icon">&raquo;</span>
                   <span class="close-icon hidden">&laquo;</span>
               </button>
@@ -98,25 +99,25 @@
               <div class="mb-4 p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
                   <label class="block text-xs font-bold text-gray-500 uppercase">Chế độ (Mode)</label>
                   <div class="flex gap-1">
-                      <select id="mode-select" class="flex-1 p-1.5 border rounded text-xs font-medium outline-none focus:border-blue-500"></select>
+                      <select id="mode-select" class="flex-1 p-1.5 border rounded text-xs font-medium outline-none focus:border-blue-500 sidebar-input-style"></select>
                       <button id="add-mode" class="px-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg leading-none" title="Thêm Mode mới">+</button>
                   </div>
                   <div class="flex gap-1">
-                      <button id="rename-mode" class="flex-1 py-1 bg-gray-400 text-white rounded text-xs hover:bg-gray-500 hidden">Đổi tên</button>
-                      <button id="delete-mode-btn" class="flex-1 py-1 bg-red-400 text-white rounded text-xs hover:bg-red-500 hidden">Xóa</button>
+                      <button id="rename-mode" class="flex-1 py-1 sidebar-btn-secondary hidden">Đổi tên</button>
+                      <button id="delete-mode-btn" class="flex-1 py-1 sidebar-btn-danger hidden">Xóa</button>
                   </div>
-                  <button id="match-case-replace" class="w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600">Match Case: TẮT</button>
-                  <button id="whole-words-replace" class="w-full py-1.5 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600">Whole Words: TẮT</button>
+                  <button id="match-case-replace" class="w-full py-1.5 mt-1 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600 setting-toggle-btn">Match Case: TẮT</button>
+                  <button id="whole-words-replace" class="w-full py-1.5 rounded text-xs font-bold transition-colors bg-gray-200 text-gray-600 setting-toggle-btn">Whole Words: TẮT</button>
               </div>
 
               <div class="flex gap-2 mb-4">
-                  <button id="export-csv" class="flex-1 py-1.5 bg-gray-100 text-gray-700 border border-gray-300 rounded text-xs font-semibold hover:bg-gray-200">Xuất CSV</button>
-                  <button id="import-csv" class="flex-1 py-1.5 bg-gray-100 text-gray-700 border border-gray-300 rounded text-xs font-semibold hover:bg-gray-200">Nhập CSV</button>
+                  <button id="export-csv" class="flex-1 py-1.5 sidebar-btn-secondary">Xuất CSV</button>
+                  <button id="import-csv" class="flex-1 py-1.5 sidebar-btn-secondary">Nhập CSV</button>
               </div>
 
               <div class="grid grid-cols-2 gap-1 mb-4">
-                  <button id="add-pair" class="py-2 bg-blue-100 text-blue-700 rounded border border-blue-200 hover:bg-blue-200 text-xs font-bold">Thêm Cặp</button>
-                  <button id="save-settings" class="py-2 bg-green-100 text-green-700 rounded border border-green-200 hover:bg-green-200 text-xs font-bold">Lưu Lại</button>
+                  <button id="add-pair" class="py-2 sidebar-btn-info">Thêm Cặp</button>
+                  <button id="save-settings" class="py-2 sidebar-btn-success">Lưu Lại</button>
               </div>
               
               <div id="punctuation-list" class="space-y-2 pb-10"></div>

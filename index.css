@@ -1,0 +1,149 @@
+/* RESET & BASE */
+* { box-sizing: border-box; }
+body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+
+/* SCROLLBAR */
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* SIDEBAR COLLAPSE STYLES */
+#search-sidebar, #replace-sidebar {
+    display: flex; /* Bắt buộc để flex-shrink/width hoạt động */
+    width: 20%; /* Mặc định */
+    transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+#search-sidebar.collapsed, #replace-sidebar.collapsed {
+    width: 45px; /* Chiều rộng thu gọn */
+    padding: 10px 0;
+    overflow: hidden;
+}
+
+#search-sidebar.collapsed #search-content,
+#replace-sidebar.collapsed #replace-content {
+    display: none;
+}
+
+#search-sidebar.collapsed .open-icon,
+#replace-sidebar.collapsed .close-icon {
+    display: block !important;
+    transform: rotate(0deg); /* Biểu tượng mở */
+}
+
+#search-sidebar .close-icon,
+#replace-sidebar .open-icon {
+    display: block; /* Biểu tượng đóng */
+}
+
+#search-sidebar.collapsed .close-icon,
+#replace-sidebar.collapsed .open-icon {
+    display: none;
+}
+
+#search-sidebar.collapsed h2,
+#replace-sidebar.collapsed h2 {
+    display: none;
+}
+
+/* EDITOR STYLES */
+#editor {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap !important; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: block;
+}
+
+#editor:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    display: block;
+}
+
+/* HIGHLIGHT STYLES */
+.replaced {
+    background-color: #fde047;
+    color: black;
+    border-radius: 3px;
+    padding: 0 2px;
+    border-bottom: 2px solid #ca8a04;
+    transition: background-color 0.3s;
+}
+
+.keyword {
+    border-radius: 3px;
+    padding: 0 2px;
+    font-weight: 600;
+}
+
+.hl-pink   { background-color: #f9a8d4; border-bottom: 2px solid #db2777; }
+.hl-blue   { background-color: #93c5fd; border-bottom: 2px solid #2563eb; }
+.hl-green  { background-color: #86efac; border-bottom: 2px solid #16a34a; }
+.hl-orange { background-color: #fdba74; border-bottom: 2px solid #ea580c; }
+.hl-purple { background-color: #d8b4fe; border-bottom: 2px solid #9333ea; }
+.hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
+
+/* TAGS & UI */
+#keywords-tags .tag {
+    background: linear-gradient(to bottom right, #eff6ff, #dbeafe);
+    color: #1e40af; padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #93c5fd; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    margin-right: 4px; 
+    margin-bottom: 4px;
+}
+#keywords-tags .tag:hover { background: #bfdbfe; transform: translateY(-1px); }
+#keywords-tags .tag .remove-tag {
+    cursor: pointer; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: rgba(255,255,255,0.5); font-size: 14px;
+}
+#keywords-tags .tag .remove-tag:hover { background: white; color: red; }
+
+#punctuation-list .punctuation-item {
+    display: flex; gap: 4px; align-items: center; background: white; padding: 4px; border: 1px solid #eee; border-radius: 4px;
+}
+#punctuation-list .punctuation-item input {
+    flex: 1; min-width: 0; padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 3px;
+    transition: border-color 0.2s;
+}
+#punctuation-list .punctuation-item input:focus { border-color: #3b82f6; outline: none; }
+#punctuation-list .punctuation-item button.remove-pair {
+    width: 24px; height: 24px; flex-shrink: 0; background: #fee2e2; color: #dc2626; border: none;
+    border-radius: 4px; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+}
+#punctuation-list .punctuation-item button.remove-pair:hover { background: #ef4444; color: white; }
+
+/* NOTIFICATIONS - FIX WHITE POPUP */
+#notification-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.notification {
+    padding: 12px 20px; border-radius: 8px; 
+    color: #fff !important; /* Chữ trắng bắt buộc */
+    background-color: #333; 
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; align-items: center; min-width: 200px;
+}
+.notification.success { background: #10b981 !important; border-left: 4px solid #065f46; }
+.notification.error { background: #ef4444 !important; border-left: 4px solid #7f1d1d; }
+
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.hidden { display: none !important; }
+
+/* Blinking DONATE */
+.donate-blink {
+    animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+}
+
+@keyframes blinker {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+

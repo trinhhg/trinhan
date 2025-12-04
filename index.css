@@ -17,13 +17,12 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* === HEADER (Yêu cầu 1) === */
+/* === HEADER === */
 .app-header {
   background: white; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 60px;
   display: flex; justify-content: space-between; align-items: center;
   flex-shrink: 0; z-index: 100;
 }
-/* Tăng độ rộng bên trái để chứa đủ dòng donate */
 .header-left { flex: 0 0 350px; } 
 .header-right { flex: 0 0 50px; display: flex; justify-content: flex-end; }
 .header-center { flex: 1; display: flex; justify-content: center; height: 100%; }
@@ -58,20 +57,29 @@ body {
 .tab-content { display: none; width: 100%; height: 100%; }
 .tab-content.active { display: flex; }
 
-.main-layout { flex-direction: row; }
-.editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s; }
+.main-layout { 
+    flex-direction: row; 
+    padding: 15px; /* Yêu cầu 1: Khoảng trống giống tab khác */
+    background: #f3f4f6;
+    gap: 15px;
+}
+.editor-area { 
+    flex: 1; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s; 
+    border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Thêm style container */
+    background: white;
+}
 .editor-wrapper { flex: 1; background: white; position: relative; overflow: hidden; }
 #editor { width: 100%; height: 100%; padding: 20px; outline: none; overflow-y: auto; font-size: 16px; line-height: 1.8; color: #333; }
 #editor:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
 
-/* FOOTER (Yêu cầu 9) */
+/* FOOTER */
 .editor-footer {
     padding: 10px 15px; border-top: 1px solid #e5e7eb; background: #f9fafb;
     display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
 }
 .footer-actions { display: flex; gap: 8px; }
 
-/* BADGE (Yêu cầu 7) */
+/* BADGE */
 .badge { 
   background: #1abc9c; color: white; padding: 3px 10px; border-radius: 12px; 
   font-size: 11px; font-weight: 600; box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3);
@@ -79,16 +87,19 @@ body {
 
 /* === SIDEBAR === */
 .sidebar {
-    width: 20%; background: white; border-left: 1px solid #e5e7eb;
+    width: 20%; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0; overflow: hidden;
 }
-.sidebar.closed { width: 0 !important; border: none; }
+.sidebar.closed { width: 0 !important; border: none; margin: 0; padding: 0; }
 .sidebar-header { padding: 12px 15px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
 .sidebar-header h3 { margin: 0; font-size: 13px; font-weight: 700; color: #374151; }
 .sidebar-content { padding: 15px; flex: 1; overflow-y: auto; }
 .sidebar-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
 .sidebar-input:focus { border-color: #2563eb; }
+
+/* Yêu cầu 8: Tag cách ô nhập */
+.tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
 .sidebar-toggle-btn {
     width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
@@ -96,7 +107,7 @@ body {
 }
 .sidebar-toggle-btn:hover { background: #e5e7eb; color: #111827; }
 
-/* === SETTINGS & KEYWORDS TAB STYLES (Yêu cầu 3) === */
+/* === SETTINGS & KEYWORDS LAYOUT === */
 .settings-layout { flex-direction: column; background: #f3f4f6; padding: 15px; overflow-y: auto; }
 .panel-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; }
 .panel-header { padding: 15px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
@@ -106,19 +117,22 @@ body {
 .select-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-right: 10px; }
 #mode-select { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
 
-.toolbar { padding: 10px 20px; background: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
-.toolbar-group { display: flex; gap: 8px; }
+.toolbar { padding: 10px 20px; background: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.toolbar-group { display: flex; gap: 8px; align-items: center; }
 .list-actions { padding: 10px 20px; display: flex; gap: 10px; }
 .scroll-area { padding: 10px 20px; background: #f9fafb; min-height: 200px; }
 
-/* KEYWORDS CONTROLS ROW (Yêu cầu 6) */
-.keywords-controls-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+/* Styles cho tab Keywords */
 .control-group { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #555; }
-.input-sm { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
-.checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
-.checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+.input-sm { padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
+.keywords-panel { padding: 20px; }
+.keywords-input-area { width: 100%; }
+/* Yêu cầu 3: Fix tràn */
+.w-full-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; outline: none; box-sizing: border-box; }
+.w-full-input:focus { border-color: #10b981; }
+.input-label { font-size: 13px; font-weight: 700; color: #374151; margin: 0 0 8px 0; }
 
-/* === BUTTONS (Yêu cầu 8 - Style giống reference) === */
+/* === BUTTONS === */
 .btn {
   padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer;
   font-size: 12px; font-weight: 600; transition: all 0.2s;
@@ -145,6 +159,17 @@ body {
 .btn-toggle:hover { background: #d1d5db; color: #374151; }
 .btn-toggle.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
 
+/* Yêu cầu 4: Button Teal Style (Giống active nhưng màu xanh ngọc) */
+.btn-teal {
+    background: #ccfbf1; /* Teal-100 */
+    color: #0f766e; /* Teal-700 */
+    padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    border: 1px solid #5eead4; /* Teal-300 */
+}
+.btn-teal:hover {
+    background: #99f6e4; /* Teal-200 */
+}
+
 /* === ITEMS & TAGS === */
 .punctuation-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #e5e7eb; }
 .punctuation-item input { flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; outline: none; }
@@ -153,7 +178,7 @@ body {
 .punctuation-item button.remove:hover { background: #ef4444; color: white; }
 .empty-message { text-align: center; color: #9ca3af; padding: 20px; font-size: 13px; }
 
-.tags-container { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Tag Styles */
 .tag {
     background: #eff6ff; color: #1e40af; padding: 4px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
@@ -162,7 +187,7 @@ body {
 .tag .remove-tag { cursor: pointer; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .tag .remove-tag:hover { background: #dbeafe; color: red; }
 
-/* HIGHLIGHT COLORS */
+/* HIGHLIGHT COLORS (Yêu cầu 5) */
 .hl-yellow { background-color: #fde047; color: #000; border-bottom: 2px solid #eab308; border-radius: 2px; padding: 0 1px; }
 .hl-blue { background-color: #93c5fd; color: #000; border-bottom: 2px solid #2563eb; border-radius: 2px; padding: 0 1px; }
 .keyword { border-radius: 3px; padding: 0 2px; font-weight: 600; }
@@ -172,11 +197,9 @@ body {
 .hl-purple { background-color: #d8b4fe; border-bottom: 2px solid #9333ea; }
 .hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
 
-/* === NOTIFICATION (Yêu cầu 10) === */
+/* === NOTIFICATION === */
 #notification-container { 
-    position: fixed; 
-    top: 70px; /* Bắt đầu dưới header (60px header + 10px padding) */
-    right: 20px; 
+    position: fixed; top: 70px; right: 20px; 
     z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; 
 }
 .notification {
@@ -189,8 +212,9 @@ body {
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: 0; opacity: 1; } }
 
 .hidden { display: none !important; }
-.w-full { width: 100%; }
-.mt-4 { margin-top: 1rem; }
+.mt-2 { margin-top: 0.5rem; }
 .p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
 .border { border-width: 1px; }
 .rounded { border-radius: 0.25rem; }
+.mb-3 { margin-bottom: 0.75rem; }

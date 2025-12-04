@@ -1,613 +1,551 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. BLOCK EXTENSIONS
-    window.addEventListener('error', e => {
-        if (e.filename && (e.filename.includes('contentScript') || e.message.includes('extension'))) {
-            e.stopImmediatePropagation(); e.preventDefault(); return false;
-        }
-    });
+    // === 1. CONFIG & STATE ===
+    const STORAGE_KEY = 'trinh_hg_pro_v17_optimized';
+    
+    // Markers (Logic tham khảo)
+    const MARK_REP_START = '\uE000';
+    const MARK_REP_END = '\uE001';
+    const MARK_CAP_START = '\uE002';
+    const MARK_CAP_END = '\uE003';
+    
+    // Keyword Colors
+    const KW_COLORS = ['hl-pink', 'hl-blue', 'hl-green', 'hl-orange', 'hl-purple', 'hl-red']; // hl-blue ở đây sẽ bị Auto Caps chiếm, nhưng logic keywords sẽ random
 
-    // 2. DOM ELEMENTS
-    const els = {
-        // Tab
-        tabs: document.querySelectorAll('.tab-btn'),
-        editorTab: document.getElementById('editor-tab'),
-        settingsTab: document.getElementById('settings-tab'),
-
-        // Editor & Keywords (Cũ: sidebar trái)
-        input: document.getElementById('keywords-input'),
-        tags: document.getElementById('keywords-tags'),
-        search: document.getElementById('search'),
-        clear: document.getElementById('clear'),
-        copyContent: document.getElementById('copy-editor-content'),
-        font: document.getElementById('fontFamily'),
-        size: document.getElementById('fontSize'),
-        matchCase: document.getElementById('matchCase'), // Highlight Setting
-        wholeWords: document.getElementById('wholeWords'), // Highlight Setting
-        editor: document.getElementById('editor'),
-        kwCount: document.getElementById('keyword-count'),
-        
-        // Keywords Sidebar (Mới)
-        kwSidebar: document.getElementById('keywords-sidebar'),
-        toggleKwSidebarTab: document.getElementById('toggle-keywords-sidebar'),
-        toggleKwSidebarInternal: document.getElementById('toggle-keywords-sidebar-internal'),
-
-        // Thay Thế (Sidebar phải cũ, nay trong Tab Settings)
-        modeSel: document.getElementById('mode-select'),
-        addMode: document.getElementById('add-mode'),
-        delMode: document.getElementById('delete-mode-btn'),
-        renameMode: document.getElementById('rename-mode'),
-        caseMode: document.getElementById('match-case-replace'),
-        wholeWordsMode: document.getElementById('whole-words-replace'), 
-        puncList: document.getElementById('punctuation-list'),
-        addPair: document.getElementById('add-pair'),
-        save: document.getElementById('save-settings'),
-        replace: document.getElementById('replace-all'),
-        notify: document.getElementById('notification-container'),
-        exportBtn: document.getElementById('export-csv'),
-        importBtn: document.getElementById('import-csv')
-    };
-
-    let state = {
+    const defaultState = {
         keywords: [],
-        modes: {},
         activeMode: 'Mặc định',
-        isKwSidebarOpen: true // Khởi tạo sidebar keywords MỞ
+        sidebarOpen: true,
+        modes: {
+            'Mặc định': { pairs: [], matchCase: false, wholeWord: false, autoCaps: false }
+        }
     };
 
-    const KW_COLORS = ['hl-pink', 'hl-blue', 'hl-green', 'hl-orange', 'hl-purple', 'hl-red'];
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
+    if (!state.modes[state.activeMode]) state.activeMode = Object.keys(state.modes)[0] || 'Mặc định';
 
-    // 3. UTILS
+    // === 2. DOM ELEMENTS ===
+    const els = {
+        // Tabs
+        tabs: document.querySelectorAll('.tab-button'),
+        contents: document.querySelectorAll('.tab-content'),
+        
+        // Editor
+        editor: document.getElementById('editor'),
+        wordCount: document.getElementById('word-count-display'),
+        
+        // Actions
+        searchBtn: document.getElementById('search'),
+        clearBtn: document.getElementById('clear'),
+        copyBtn: document.getElementById('copy-editor-content'),
+        replaceBtn: document.getElementById('replace-all'),
+
+        // Sidebar Elements
+        sidebar: document.getElementById('keywords-sidebar'),
+        sidebarToggle: document.getElementById('header-sidebar-toggle'),
+        sidebarClose: document.getElementById('sidebar-close-btn'),
+        sidebarInput: document.getElementById('sidebar-input'),
+        sidebarTags: document.getElementById('sidebar-tags'),
+        
+        // Display & Full Keywords Tab
+        fontFamily: document.getElementById('fontFamily'),
+        fontSize: document.getElementById('fontSize'),
+        matchCaseBtn: document.getElementById('match-case-btn'),
+        wholeWordBtn: document.getElementById('whole-word-btn'),
+        autoCapsBtn: document.getElementById('auto-caps-btn'),
+        fullKwInput: document.getElementById('full-keywords-input'),
+        fullKwTags: document.getElementById('full-keywords-tags'),
+        
+        // Settings Tab (Replace)
+        modeSelect: document.getElementById('mode-select'),
+        addModeBtn: document.getElementById('add-mode'),
+        renameModeBtn: document.getElementById('rename-mode'),
+        deleteModeBtn: document.getElementById('delete-mode'),
+        saveSettingsBtn: document.getElementById('save-settings'),
+        addPairBtn: document.getElementById('add-pair'),
+        puncList: document.getElementById('punctuation-list'),
+        emptyState: document.getElementById('empty-state'),
+        importBtn: document.getElementById('import-csv'),
+        exportBtn: document.getElementById('export-csv'),
+        
+        notify: document.getElementById('notification-container')
+    };
+
+    // === 3. CORE FUNCTIONS ===
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
     function notify(msg, type = 'success') {
         const div = document.createElement('div');
         div.className = `notification ${type}`;
-        div.innerHTML = type === 'success' ? `✓ ${msg}` : `⚠️ ${msg}`;
+        div.textContent = msg;
         els.notify.prepend(div);
         setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 3000);
     }
 
-    // --- DOM HELPER ---
-    function getTextNodesSnapshot(root, opts = {}) {
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-        const nodes = [];
-        let node;
-        while ((node = walker.nextNode())) {
-            if (!node.nodeValue) continue;
-            let p = node.parentElement;
-            let skip = false;
-            while (p && p !== root) {
-                if (p.classList && (
-                    (opts.skipClass1 && p.classList.contains(opts.skipClass1)) || 
-                    (opts.skipClass2 && p.classList.contains(opts.skipClass2))
-                )) {
-                    skip = true; break;
-                }
-                p = p.parentElement;
-            }
-            if (!skip) nodes.push(node);
-        }
-        return nodes;
-    }
-
-    // === 4. LOGIC CHÍNH ===
-
-    function unwrapClasses(classesToRemove) {
-        classesToRemove.forEach(cls => {
-            const spans = els.editor.querySelectorAll(`span.${cls}`);
-            spans.forEach(span => {
-                const parent = span.parentNode;
-                while(span.firstChild) parent.insertBefore(span.firstChild, span);
-                parent.removeChild(span);
-            });
-        });
-        // Chuẩn hóa cây DOM để gộp các text node liền kề lại
-        els.editor.normalize();
-    }
-
-    function highlightKeywords() {
-        try {
-            unwrapClasses(['keyword']); 
-            let totalMatches = 0;
-            els.kwCount.textContent = '0'; // Reset count
-            if (!state.keywords.length) return 0;
-
-            // Chỉ highlight trong các text node KHÔNG nằm trong thẻ 'replaced'
-            const nodes = getTextNodesSnapshot(els.editor, { skipClass1: 'replaced' });
-            const caseSensitive = els.matchCase.checked;
-            const isWholeWord = els.wholeWords.checked;
-
-            let wordCharRegex;
-            try {
-                // Hỗ trợ ký tự Unicode cho ngôn ngữ tiếng Việt
-                wordCharRegex = /[\p{L}\p{N}_]/u; 
-            } catch (e) {
-                // Fallback nếu trình duyệt không hỗ trợ /u
-                wordCharRegex = /[a-zA-Z0-9àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýđ_]/i;
-            }
-
-            // Sắp xếp từ khóa: từ dài đến ngắn để tránh highlight từ ngắn làm hỏng từ dài
-            const sortedKws = [...state.keywords].sort((a,b) => b.length - a.length);
-
-            for (const textNode of nodes) {
-                if (!textNode.parentNode) continue;
-                let node = textNode;
-
-                outer: while (node && node.nodeValue) {
-                    const nodeText = caseSensitive ? node.nodeValue : node.nodeValue.toLowerCase();
-                    let foundIdx = -1, foundWord = null, colorIdx = 0;
-
-                    // Tìm từ khóa đầu tiên (theo vị trí và ưu tiên từ dài nhất)
-                    for (let i = 0; i < sortedKws.length; i++) {
-                        const w = sortedKws[i];
-                        const mw = caseSensitive ? w : w.toLowerCase();
-                        const idx = nodeText.indexOf(mw);
-                        
-                        if (idx !== -1) {
-                            if (isWholeWord) {
-                                // Kiểm tra ký tự trước và sau từ được tìm thấy
-                                const charBefore = idx > 0 ? nodeText[idx-1] : '';
-                                const charAfter = idx + mw.length < nodeText.length ? nodeText[idx+mw.length] : '';
-                                
-                                // Nếu ký tự trước HOẶC sau là ký tự chữ/số/gạch dưới, BỎ QUA (không phải Whole Word)
-                                if (wordCharRegex.test(charBefore) || wordCharRegex.test(charAfter)) {
-                                    continue; 
-                                }
-                            }
-                            
-                            // Nếu đây là lần tìm thấy đầu tiên hoặc tìm thấy ở vị trí sớm hơn
-                            if (foundIdx === -1 || idx < foundIdx) {
-                                foundIdx = idx; foundWord = w; colorIdx = i;
-                            }
-                        }
-                    }
-
-                    if (foundIdx === -1) break; // Hết từ khóa trong node này
-
-                    // Tách Text Node thành 3 phần: [trước từ khóa] [từ khóa] [sau từ khóa]
-                    const matchNode = node.splitText(foundIdx);
-                    const afterNode = matchNode.splitText(foundWord.length);
-
-                    // Bọc từ khóa bằng <span>
-                    const span = document.createElement('span');
-                    span.className = `keyword ${KW_COLORS[colorIdx % KW_COLORS.length]}`;
-                    span.textContent = matchNode.nodeValue;
-
-                    matchNode.parentNode.replaceChild(span, matchNode);
-                    totalMatches++; 
-
-                    node = afterNode; // Tiếp tục tìm kiếm trong phần 'sau từ khóa'
-                    continue outer;
-                }
-            }
-            els.kwCount.textContent = totalMatches.toString();
-            return totalMatches;
-        } catch (e) {
-            console.error('Lỗi khi highlight:', e);
-            els.kwCount.textContent = 'Lỗi';
-            return 0;
-        }
-    }
-
-    function performReplace() {
-        saveData();
-        const mode = state.modes[state.activeMode];
-        if (!mode.pairs.length) return notify('Chưa có từ khóa để thay thế!', 'error');
-        if (!els.editor.textContent.trim()) return notify('Văn bản trống!', 'error');
-
-        unwrapClasses(['keyword', 'replaced']); // Xóa highlight và replaced cũ
-        const caseSensitive = mode.case;
-        const isWholeWord = mode.wholeWord;
-        // Sắp xếp: từ cần thay thế dài hơn được xử lý trước
-        const pairs = [...mode.pairs].sort((a, b) => b.find.length - a.find.length);
-        let count = 0;
-
-        let wordCharRegex;
-        try {
-            wordCharRegex = /[\p{L}\p{N}_]/u; 
-        } catch (e) {
-            wordCharRegex = /[a-zA-Z0-9àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýđ_]/i;
-        }
-
-        pairs.forEach(pair => {
-            const fromWord = pair.find;
-            const toWord = pair.replace;
-            if(!fromWord) return;
-
-            // Chỉ thay thế trong các text node KHÔNG nằm trong thẻ 'replaced'
-            const nodes = getTextNodesSnapshot(els.editor, { skipClass1: 'replaced' });
-
-            for (const textNode of nodes) {
-                if (!textNode.parentNode) continue;
-                let node = textNode;
-                
-                while (node && node.nodeValue) {
-                    const nodeText = caseSensitive ? node.nodeValue : node.nodeValue.toLowerCase();
-                    const searchFor = caseSensitive ? fromWord : fromWord.toLowerCase();
-                    const idx = nodeText.indexOf(searchFor);
-
-                    if (idx === -1) break;
-
-                    // Kiểm tra Whole Word
-                    if (isWholeWord) {
-                        const charBefore = idx > 0 ? nodeText[idx-1] : '';
-                        const charAfter = idx + searchFor.length < nodeText.length ? nodeText[idx+searchFor.length] : '';
-                        
-                        if (wordCharRegex.test(charBefore) || wordCharRegex.test(charAfter)) {
-                            // Không phải Whole Word, cắt node để tiếp tục tìm kiếm sau vị trí này
-                            const afterMatch = node.nodeValue.substring(idx + 1);
-                            node = node.splitText(idx + 1);
-                            node.nodeValue = afterMatch;
-                            continue; 
-                        }
-                    }
-
-                    // Tách node: [trước] [tìm thấy] [sau]
-                    const matchNode = node.splitText(idx);
-                    const afterNode = matchNode.splitText(fromWord.length);
-                    
-                    let finalReplace = toWord;
-                    // Lấy phần văn bản trước từ vừa tìm thấy (không bao gồm các node khác)
-                    let prefix = node.nodeValue;
-                    
-                    // Logic tự động viết hoa chữ cái đầu (Yêu cầu cũ - Tự động viết hoa đầu câu/dòng)
-                    const isStartOfLine = /^\s*$/.test(prefix) || /\n\s*$/.test(prefix);
-                    const isAfterPunctuation = /([\.?!])\s*$/.test(prefix);
-
-                    if (isStartOfLine || isAfterPunctuation) {
-                         if (finalReplace.length > 0) {
-                             finalReplace = finalReplace.charAt(0).toUpperCase() + finalReplace.slice(1);
-                         }
-                    }
-
-                    // Thay thế bằng thẻ <span>.replaced
-                    const span = document.createElement('span');
-                    span.className = 'replaced';
-                    span.setAttribute('data-original', matchNode.nodeValue);
-                    span.textContent = finalReplace; 
-
-                    matchNode.parentNode.replaceChild(span, matchNode);
-                    count++;
-                    
-                    node = afterNode; // Tiếp tục tìm kiếm trong phần 'sau'
-                }
+    // --- TAB LOGIC ---
+    function switchTab(tabId) {
+        els.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+        els.contents.forEach(c => {
+            if (c.id === tabId) {
+                c.classList.remove('hidden');
+                c.classList.add('active');
+            } else {
+                c.classList.add('hidden');
+                c.classList.remove('active');
             }
         });
-
-        if (count > 0) {
-            notify(`Đã thay thế ${count} từ!`, 'success');
-            // Sau khi thay thế xong, highlight lại (nếu có keywords)
-            if(state.keywords.length > 0) highlightKeywords();
+        
+        // Xử lý nút Sidebar Toggle trên Header
+        if (tabId === 'main-tab') {
+            els.sidebarToggle.classList.remove('hidden');
         } else {
-            notify('Không tìm thấy từ nào để thay thế.', 'error');
+            els.sidebarToggle.classList.add('hidden');
         }
     }
 
-    // --- EVENT HANDLERS ---
+    els.tabs.forEach(btn => btn.onclick = () => switchTab(btn.dataset.tab));
+
+    // --- SIDEBAR LOGIC ---
+    function toggleSidebar(forceState) {
+        const isOpen = forceState !== undefined ? forceState : !state.sidebarOpen;
+        state.sidebarOpen = isOpen;
+        
+        if (isOpen) {
+            els.sidebar.classList.remove('closed');
+            els.sidebarToggle.querySelector('.icon').textContent = '«'; // Icon đóng
+        } else {
+            els.sidebar.classList.add('closed');
+            els.sidebarToggle.querySelector('.icon').textContent = '»'; // Icon mở
+        }
+        saveState();
+    }
     
-    // 1. ADD KEYWORDS LOGIC 
-    function addKw() {
-        const raw = els.input.value;
-        if (!raw.trim()) return;
+    els.sidebarToggle.onclick = () => toggleSidebar();
+    els.sidebarClose.onclick = () => toggleSidebar(false);
+    // Init sidebar state
+    toggleSidebar(state.sidebarOpen);
+
+    // --- HELPER: TEXT NORMALIZATION ---
+    function normalizeText(text) {
+        if (!text) return '';
+        return text
+            .replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB\u275D\u275E\u301D-\u301F\uFF02\u02DD]/g, '"')
+            .replace(/[\u2018\u2019\u201A\u201B\u2039\u203A\u275B\u275C\u276E\u276F\uA78C\uFF07]/g, "'")
+            .replace(/\u00A0/g, ' ');
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' })[m]);
+    }
+    
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function preserveCase(original, replacement) {
+        if (original === original.toUpperCase() && original !== original.toLowerCase()) return replacement.toUpperCase();
+        if (original[0] === original[0].toUpperCase() && original.slice(1) === original.slice(1).toLowerCase()) {
+            return replacement.charAt(0).toUpperCase() + replacement.slice(1).toLowerCase();
+        }
+        return replacement;
+    }
+
+    // === 4. REPLACE LOGIC (INTEGRATED FROM REFERENCE) ===
+    
+    function performReplaceAll() {
+        const mode = state.modes[state.activeMode];
+        let rawText = els.editor.innerText; // Lấy text thuần từ editor
+        if (!rawText.trim()) return notify('Editor trống!', 'error');
+
+        els.replaceBtn.textContent = 'Đang xử lý...';
         
-        const newKws = raw.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
-        let addedCount = 0;
+        setTimeout(() => {
+            try {
+                // 1. Normalize
+                let processedText = normalizeText(rawText);
+                let replaceCount = 0;
+
+                // 2. Phase 1: Custom Replace (Yellow)
+                if (mode.pairs.length > 0) {
+                    const rules = mode.pairs
+                        .filter(p => p.find && p.find.trim())
+                        .map(p => ({ find: normalizeText(p.find), replace: normalizeText(p.replace || '') }))
+                        .sort((a,b) => b.find.length - a.find.length);
+
+                    rules.forEach(rule => {
+                        const pattern = escapeRegExp(rule.find);
+                        const flags = mode.matchCase ? 'g' : 'gi';
+                        let regex;
+                        
+                        if (mode.wholeWord) {
+                            regex = new RegExp(`(?<![\\p{L}\\p{N}_])${pattern}(?![\\p{L}\\p{N}_])`, flags + 'u');
+                        } else {
+                            regex = new RegExp(pattern, flags);
+                        }
+
+                        processedText = processedText.replace(regex, (match) => {
+                            replaceCount++;
+                            let replacement = rule.replace;
+                            if (!mode.matchCase) replacement = preserveCase(match, replacement);
+                            return `${MARK_REP_START}${replacement}${MARK_REP_END}`;
+                        });
+                    });
+                }
+
+                // 3. Phase 2: Auto Caps (Blue)
+                if (mode.autoCaps) {
+                    // Logic: Tìm ký tự thường sau dấu câu, bỏ qua các marker đã có
+                    const autoCapsRegex = /(^|[\.?!\n]\s*)(?:\uE000|\uE001|\uE002|\uE003)*([\p{Ll}])/gmu;
+                    processedText = processedText.replace(autoCapsRegex, (fullMatch, prefix, char) => {
+                        return `${prefix}${MARK_CAP_START}${char.toUpperCase()}${MARK_CAP_END}`;
+                    });
+                }
+
+                // 4. Build HTML
+                let finalHTML = '';
+                let buffer = '';
+                
+                for (let i = 0; i < processedText.length; i++) {
+                    const c = processedText[i];
+                    if (c === MARK_REP_START) {
+                        finalHTML += escapeHTML(buffer) + '<span class="hl-yellow" contenteditable="false">'; // contenteditable="false" để chặn sửa
+                        buffer = '';
+                    } else if (c === MARK_REP_END) {
+                        finalHTML += escapeHTML(buffer) + '</span>&#8203;'; // Zero width space để thoát span
+                        buffer = '';
+                    } else if (c === MARK_CAP_START) {
+                        finalHTML += escapeHTML(buffer) + '<span class="hl-blue" contenteditable="false">';
+                        buffer = '';
+                    } else if (c === MARK_CAP_END) {
+                        finalHTML += escapeHTML(buffer) + '</span>&#8203;';
+                        buffer = '';
+                    } else {
+                        buffer += c;
+                    }
+                }
+                finalHTML += escapeHTML(buffer);
+
+                // 5. Update DOM
+                els.editor.innerHTML = finalHTML;
+                
+                // 6. Highlight Keywords sau khi thay thế
+                if (state.keywords.length > 0) highlightKeywordsDOM();
+
+                updateWordCount();
+                
+                if (replaceCount > 0) notify(`Thay thế ${replaceCount} từ!`);
+                else if (mode.autoCaps) notify('Đã Auto Caps!');
+                else notify('Không có gì để thay thế.', 'warning');
+
+            } catch (e) {
+                console.error(e);
+                notify('Lỗi: ' + e.message, 'error');
+            } finally {
+                els.replaceBtn.textContent = 'Thực Hiện Thay Thế';
+            }
+        }, 50);
+    }
+
+    // === 5. KEYWORD HIGHLIGHT LOGIC (DOM BASED) ===
+    function highlightKeywordsDOM() {
+        // Xóa highlight cũ của keywords (giữ lại replaced/autocaps)
+        const oldKws = els.editor.querySelectorAll('.keyword');
+        oldKws.forEach(span => {
+            const parent = span.parentNode;
+            while(span.firstChild) parent.insertBefore(span.firstChild, span);
+            parent.removeChild(span);
+        });
+        els.editor.normalize();
+
+        if (!state.keywords.length) return;
+
+        // TreeWalker để tìm text nodes
+        const walker = document.createTreeWalker(els.editor, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        let node;
+        while(node = walker.nextNode()) {
+            // Bỏ qua text bên trong các thẻ hl-yellow, hl-blue đã replace
+            if (node.parentElement && (node.parentElement.classList.contains('hl-yellow') || node.parentElement.classList.contains('hl-blue'))) continue;
+            textNodes.push(node);
+        }
+
+        const sortedKws = [...state.keywords].sort((a,b) => b.length - a.length);
+        const mode = state.modes[state.activeMode]; // Lấy setting hiển thị từ mode hiện tại
         
-        newKws.forEach(k => {
+        let wordCharRegex = /[\p{L}\p{N}_]/u;
+
+        for (const textNode of textNodes) {
+            if (!textNode.parentNode) continue;
+            let currentNode = textNode;
+            
+            // Loop tìm kiếm trong text node
+            outer: while(currentNode && currentNode.nodeValue) {
+                const text = mode.matchCase ? currentNode.nodeValue : currentNode.nodeValue.toLowerCase();
+                let bestIdx = -1, bestKw = '', colorIdx = 0;
+
+                for (let i = 0; i < sortedKws.length; i++) {
+                    const kw = sortedKws[i];
+                    const searchKw = mode.matchCase ? kw : kw.toLowerCase();
+                    const idx = text.indexOf(searchKw);
+
+                    if (idx !== -1) {
+                        // Check Whole Word
+                        if (mode.wholeWord) {
+                            const prev = idx > 0 ? text[idx-1] : '';
+                            const next = idx + searchKw.length < text.length ? text[idx+searchKw.length] : '';
+                            if (wordCharRegex.test(prev) || wordCharRegex.test(next)) continue;
+                        }
+
+                        if (bestIdx === -1 || idx < bestIdx) {
+                            bestIdx = idx; bestKw = kw; colorIdx = i;
+                        }
+                    }
+                }
+
+                if (bestIdx === -1) break;
+
+                // Split & Wrap
+                const matchNode = currentNode.splitText(bestIdx);
+                const afterNode = matchNode.splitText(bestKw.length);
+                
+                const span = document.createElement('span');
+                span.className = `keyword ${KW_COLORS[colorIdx % KW_COLORS.length]}`;
+                span.textContent = matchNode.nodeValue;
+                span.contentEditable = "false"; // Chặn sửa bên trong keyword
+
+                matchNode.parentNode.replaceChild(span, matchNode);
+                
+                // Chèn zero-width space sau highlight để sửa lỗi bleeding
+                const zws = document.createTextNode('\u200B');
+                span.parentNode.insertBefore(zws, afterNode);
+
+                currentNode = afterNode;
+            }
+        }
+    }
+
+    // === 6. TYPING BUG FIX (Prevent highlight bleeding) ===
+    // Mặc dù đã dùng contenteditable="false" cho span, ta cần đảm bảo
+    // người dùng có thể gõ tiếp sau từ đó một cách tự nhiên.
+    els.editor.addEventListener('keydown', (e) => {
+        // Nếu nhấn mũi tên phải hoặc gõ phím khi đang ở sát biên của span
+        // Trình duyệt đôi khi kẹt con trỏ. contenteditable="false" giúp giảm điều này.
+        // Zero-width space (\u200B) giúp con trỏ thoát ra.
+    });
+
+    // === 7. KEYWORDS MANAGEMENT ===
+    function addKeyword(val) {
+        if (!val.trim()) return;
+        const keys = val.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
+        let changed = false;
+        keys.forEach(k => {
             if (!state.keywords.includes(k)) {
                 state.keywords.push(k);
-                renderTag(k);
-                addedCount++;
+                changed = true;
             }
         });
-        
-        els.input.value = '';
-        if (addedCount > 0) highlightKeywords(); // Highlight ngay sau khi thêm từ
-    }
-
-    els.input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault(); 
-            addKw();
+        if (changed) {
+            renderTags();
+            saveState();
+            highlightKeywordsDOM();
         }
-    });
-
-    els.input.addEventListener('blur', addKw);
-
-    function renderTag(txt) {
-        const tag = document.createElement('div');
-        tag.className = 'tag';
-        tag.innerHTML = `<span>${txt.replace(/</g, "&lt;")}</span><span class="remove-tag">×</span>`;
-        tag.querySelector('.remove-tag').onclick = () => {
-            state.keywords = state.keywords.filter(k => k !== txt);
-            tag.remove();
-            highlightKeywords(); 
-        };
-        els.tags.appendChild(tag);
+        els.sidebarInput.value = '';
+        els.fullKwInput.value = '';
     }
 
-    // Nút Search/Highlight
-    els.search.onclick = () => {
-        addKw(); // Thêm từ đang nằm trong ô input trước khi tìm
-        if (!state.keywords.length) return notify('Chưa nhập từ khóa!', 'error');
-        const count = highlightKeywords();
-        notify(`Đã highlight ${count} từ khóa!`, 'success');
-    };
+    function renderTags() {
+        const html = state.keywords.map(k => `
+            <div class="tag">
+                <span>${escapeHTML(k)}</span>
+                <span class="remove-tag" data-kw="${escapeHTML(k)}">×</span>
+            </div>
+        `).join('');
+        els.sidebarTags.innerHTML = html;
+        els.fullKwTags.innerHTML = html; // Sync cả 2 chỗ
 
-    // Ngăn chặn Paste HTML
-    els.editor.addEventListener('paste', e => {
-        e.preventDefault();
-        let text = (e.clipboardData || window.clipboardData).getData('text/plain');
-        text = text.replace(/\r\n/g, '\n'); 
-        document.execCommand('insertText', false, text);
-    });
-
-    // Copy & Clear
-    els.copyContent.onclick = () => {
-        const text = els.editor.innerText;
-        if (!text.trim()) return notify('Không có nội dung!', 'error');
-        navigator.clipboard.writeText(text);
-        els.editor.innerHTML = ''; 
-        notify('Đã copy và xóa nội dung!', 'success');
-    };
-
-    // Clear
-    els.clear.onclick = () => {
-        els.editor.innerHTML = ''; state.keywords = []; els.tags.innerHTML = '';
-        notify('Đã xóa tất cả.');
-        highlightKeywords(); // Xóa hết highlight
-    };
-
-    // Thay thế
-    els.replace.onclick = performReplace;
-
-    // --- UI/UX & DATA ---
-    function updateFont() {
-        els.editor.style.fontFamily = els.font.value;
-        els.editor.style.fontSize = els.size.value;
-    }
-    els.font.addEventListener('change', updateFont);
-    els.size.addEventListener('change', updateFont);
-
-    // Highlight settings in Editor tab
-    els.matchCase.onchange = highlightKeywords;
-    els.wholeWords.onchange = highlightKeywords;
-
-    // --- TAB LOGIC (Yêu cầu 1) ---
-    els.tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetId = tab.getAttribute('data-tab');
-            
-            // Deactivate all tabs and hide all content
-            els.tabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            
-            // Activate clicked tab and show its content
-            tab.classList.add('active');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
-
-    // --- KEYWORDS SIDEBAR TOGGLE LOGIC (Yêu cầu 5) ---
-    function toggleKwSidebar() {
-        state.isKwSidebarOpen = !state.isKwSidebarOpen;
-        const isOpen = state.isKwSidebarOpen;
-
-        // Cập nhật trạng thái sidebar chính
-        els.kwSidebar.classList.toggle('sidebar-closed', !isOpen);
-        // Cập nhật trạng thái tab button (toggle)
-        els.toggleKwSidebarTab.querySelector('.open-icon').classList.toggle('hidden', isOpen);
-        els.toggleKwSidebarTab.querySelector('.close-icon').classList.toggle('hidden', !isOpen);
-        // Cập nhật trạng thái internal button
-        els.toggleKwSidebarInternal.querySelector('.open-icon').classList.toggle('hidden', isOpen);
-        els.toggleKwSidebarInternal.querySelector('.close-icon').classList.toggle('hidden', !isOpen);
-
-        // Lưu trạng thái vào localStorage (optional, nhưng nên làm)
-        localStorage.setItem('kw_sidebar_open', isOpen);
-    }
-    
-    // Nút toggle trên Header Tab
-    els.toggleKwSidebarTab.onclick = toggleKwSidebar;
-    // Nút toggle bên trong Sidebar
-    els.toggleKwSidebarInternal.onclick = toggleKwSidebar;
-
-    // Khởi tạo trạng thái sidebar ban đầu từ localStorage hoặc mặc định
-    const initialSidebarState = localStorage.getItem('kw_sidebar_open');
-    if (initialSidebarState === 'false') {
-        state.isKwSidebarOpen = true; // Đảo ngược để lần gọi đầu tiên sẽ đóng
-        toggleKwSidebar();
-    } else {
-        // Đảm bảo sidebar MỞ
-        els.kwSidebar.classList.remove('sidebar-closed');
-        els.kwSidebar.style.display = 'flex';
-        els.toggleKwSidebarTab.querySelector('.open-icon').classList.add('hidden');
-        els.toggleKwSidebarTab.querySelector('.close-icon').classList.remove('hidden');
-        els.toggleKwSidebarInternal.querySelector('.open-icon').classList.add('hidden');
-        els.toggleKwSidebarInternal.querySelector('.close-icon').classList.remove('hidden');
-    }
-
-
-    // --- DATA MANAGEMENT ---
-    function loadData() {
-        try {
-            const raw = localStorage.getItem('replace_data');
-            const data = JSON.parse(raw);
-            if (data && data.modes) {
-                state.modes = data.modes;
-                state.activeMode = data.active || 'Mặc định';
+        document.querySelectorAll('.remove-tag').forEach(btn => {
+            btn.onclick = (e) => {
+                const kw = e.target.dataset.kw;
+                state.keywords = state.keywords.filter(k => k !== kw);
+                renderTags();
+                saveState();
+                highlightKeywordsDOM(); // Re-run highlight removal
             }
-            if (data && data.keywords) {
-                state.keywords = data.keywords;
-                state.keywords.forEach(renderTag);
-            }
-        } catch {
-            state.modes = { 'Mặc định': { pairs: [], case: false, wholeWord: false } };
-            state.keywords = [];
-        }
-        
-        // Đảm bảo tất cả mode có đủ trường
-        Object.keys(state.modes).forEach(k => {
-            if (typeof state.modes[k].wholeWord === 'undefined') state.modes[k].wholeWord = false;
-            if (typeof state.modes[k].case === 'undefined') state.modes[k].case = false;
         });
-        
-        updateModeUI();
     }
 
-    function saveData() {
-        const pairs = [];
-        els.puncList.querySelectorAll('.punctuation-item').forEach(div => {
-            const find = div.querySelector('.find').value;
-            const rep = div.querySelector('.replace').value;
-            if (find) pairs.push({ find, replace: rep });
+    [els.sidebarInput, els.fullKwInput].forEach(inp => {
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addKeyword(inp.value); }
         });
-        state.modes[state.activeMode].pairs = pairs;
-        
-        // Lưu cả keywords
-        localStorage.setItem('replace_data', JSON.stringify({ 
-            modes: state.modes, 
-            active: state.activeMode, 
-            keywords: state.keywords
-        }));
-    }
+        inp.addEventListener('blur', () => addKeyword(inp.value));
+    });
 
-    function updateModeUI() {
-        els.modeSel.innerHTML = '';
-        Object.keys(state.modes).forEach(k => els.modeSel.add(new Option(k, k, false, k === state.activeMode)));
+    // === 8. SETTINGS & MODE UI ===
+    function renderModeUI() {
+        const mode = state.modes[state.activeMode];
+        
+        // Buttons
+        els.matchCaseBtn.textContent = `Match Case: ${mode.matchCase ? 'BẬT' : 'Tắt'}`;
+        els.matchCaseBtn.classList.toggle('active', mode.matchCase);
+        
+        els.wholeWordBtn.textContent = `Whole Word: ${mode.wholeWord ? 'BẬT' : 'Tắt'}`;
+        els.wholeWordBtn.classList.toggle('active', mode.wholeWord);
+        
+        els.autoCapsBtn.textContent = `Auto Caps: ${mode.autoCaps ? 'BẬT' : 'Tắt'}`;
+        els.autoCapsBtn.classList.toggle('active', mode.autoCaps);
+        
+        // Pairs
+        els.puncList.innerHTML = '';
+        mode.pairs.forEach(p => addPairUI(p.find, p.replace));
+        checkEmpty();
+        
+        // Select Options
+        els.modeSelect.innerHTML = '';
+        Object.keys(state.modes).forEach(m => {
+            els.modeSelect.add(new Option(m, m, false, m === state.activeMode));
+        });
         
         const isDef = state.activeMode === 'Mặc định';
-        els.delMode.classList.toggle('hidden', isDef);
-        els.renameMode.classList.toggle('hidden', isDef);
-        
-        const mode = state.modes[state.activeMode];
-
-        // Cập nhật Match Case (Yêu cầu 6)
-        els.caseMode.textContent = mode.case ? 'Match Case: BẬT' : 'Match Case: TẮT';
-        els.caseMode.classList.toggle('bg-green-200', mode.case);
-        els.caseMode.classList.toggle('text-green-800', mode.case);
-        els.caseMode.classList.toggle('bg-gray-200', !mode.case);
-        els.caseMode.classList.toggle('text-gray-600', !mode.case);
-
-        // Cập nhật Whole Words (Yêu cầu 6)
-        els.wholeWordsMode.textContent = mode.wholeWord ? 'Whole Words: BẬT' : 'Whole Words: TẮT';
-        els.wholeWordsMode.classList.toggle('bg-green-200', mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('text-green-800', mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('bg-gray-200', !mode.wholeWord);
-        els.wholeWordsMode.classList.toggle('text-gray-600', !mode.wholeWord);
-        
-        els.puncList.innerHTML = '';
-        if (mode.pairs) {
-            mode.pairs.forEach(p => addPairUI(p.find, p.replace, true)); 
-        }
+        els.renameModeBtn.classList.toggle('hidden', isDef);
+        els.deleteModeBtn.classList.toggle('hidden', isDef);
     }
 
-    function addPairUI(f = '', r = '', append = false) {
+    function addPairUI(f = '', r = '') {
         const div = document.createElement('div');
         div.className = 'punctuation-item';
-        div.innerHTML = `<input type="text" class="find" placeholder="Tìm" value="${f.replace(/"/g, '&quot;')}"><span class="text-gray-400">→</span><input type="text" class="replace" placeholder="Thay" value="${r.replace(/"/g, '&quot;')}"><button class="remove-pair" tabindex="-1">×</button>`;
-        div.querySelector('.remove-pair').onclick = () => div.remove();
-        
-        if (append) {
-            els.puncList.appendChild(div);
-        } else {
-            els.puncList.prepend(div);
-        }
+        div.innerHTML = `
+            <input type="text" class="find" placeholder="Tìm" value="${escapeHTML(f)}">
+            <span class="text-gray-400">→</span>
+            <input type="text" class="replace" placeholder="Thay" value="${escapeHTML(r)}">
+            <button class="remove" tabindex="-1">×</button>
+        `;
+        div.querySelector('.remove').onclick = () => { div.remove(); checkEmpty(); savePairsFromUI(); };
+        div.querySelectorAll('input').forEach(i => i.addEventListener('input', () => savePairsFromUI()));
+        els.puncList.prepend(div);
     }
 
-    // --- CSV EXPORT & IMPORT ---
-    els.exportBtn.onclick = () => {
-        saveData();
-        let csvContent = "\uFEFFfind,replace,mode,case_sensitive,whole_word\n"; 
-        Object.keys(state.modes).forEach(modeName => {
-            const mode = state.modes[modeName];
-            const caseStatus = mode.case ? 'TRUE' : 'FALSE';
-            const wholeWordStatus = mode.wholeWord ? 'TRUE' : 'FALSE';
-            if (mode.pairs) {
-                mode.pairs.forEach(p => {
-                    const safeFind = p.find.replace(/"/g, '""');
-                    const safeReplace = p.replace.replace(/"/g, '""');
-                    csvContent += `"${safeFind}","${safeReplace}","${modeName}",${caseStatus},${wholeWordStatus}\n`;
-                });
-            }
+    function checkEmpty() {
+        els.emptyState.classList.toggle('hidden', els.puncList.children.length > 0);
+    }
+
+    function savePairsFromUI() {
+        const pairs = [];
+        els.puncList.querySelectorAll('.punctuation-item').forEach(d => {
+            pairs.push({
+                find: d.querySelector('.find').value,
+                replace: d.querySelector('.replace').value
+            });
         });
-        const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
-        const link = document.createElement("a");
-        link.href = url; link.download = "data_thay_the.csv";
-        link.click();
-        notify('Đã xuất file CSV!');
+        state.modes[state.activeMode].pairs = pairs;
+        saveState();
+    }
+
+    // Toggle Handlers
+    els.matchCaseBtn.onclick = () => { state.modes[state.activeMode].matchCase = !state.modes[state.activeMode].matchCase; saveState(); renderModeUI(); };
+    els.wholeWordBtn.onclick = () => { state.modes[state.activeMode].wholeWord = !state.modes[state.activeMode].wholeWord; saveState(); renderModeUI(); };
+    els.autoCapsBtn.onclick = () => { state.modes[state.activeMode].autoCaps = !state.modes[state.activeMode].autoCaps; saveState(); renderModeUI(); };
+
+    // Mode Management
+    els.modeSelect.onchange = () => { state.activeMode = els.modeSelect.value; saveState(); renderModeUI(); };
+    els.addModeBtn.onclick = () => {
+        const n = prompt('Tên chế độ mới:');
+        if (n && !state.modes[n]) {
+            state.modes[n] = { pairs: [], matchCase: false, wholeWord: false, autoCaps: false };
+            state.activeMode = n; saveState(); renderModeUI();
+        }
+    };
+    els.renameModeBtn.onclick = () => {
+        const n = prompt('Tên mới:', state.activeMode);
+        if (n && !state.modes[n]) {
+            state.modes[n] = state.modes[state.activeMode];
+            delete state.modes[state.activeMode];
+            state.activeMode = n; saveState(); renderModeUI();
+        }
+    };
+    els.deleteModeBtn.onclick = () => {
+        if (confirm('Xóa chế độ này?')) {
+            delete state.modes[state.activeMode];
+            state.activeMode = 'Mặc định'; saveState(); renderModeUI();
+        }
+    };
+    els.addPairBtn.onclick = () => { addPairUI(); els.puncList.firstChild.querySelector('input').focus(); checkEmpty(); };
+    els.saveSettingsBtn.onclick = () => { savePairsFromUI(); notify('Đã lưu cài đặt!'); };
+
+    // Import/Export CSV
+    els.exportBtn.onclick = () => {
+        let csv = "\uFEFFfind,replace,mode\n";
+        Object.keys(state.modes).forEach(m => {
+            state.modes[m].pairs.forEach(p => {
+                csv += `"${p.find.replace(/"/g,'""')}","${p.replace.replace(/"/g,'""')}","${m}"\n`;
+            });
+        });
+        const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+        const a = document.createElement('a'); a.href=url; a.download='settings.csv'; a.click();
     };
 
     els.importBtn.onclick = () => {
-        const input = document.createElement('input');
-        input.type = 'file'; input.accept = '.csv';
-        input.onchange = e => {
+        const inp = document.createElement('input'); inp.type='file'; inp.accept='.csv';
+        inp.onchange = e => {
             const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                const text = evt.target.result;
-                const lines = text.split(/\r?\n/);
-                if (!lines[0].toLowerCase().includes('find,replace,mode')) {
-                    return notify('File CSV sai định dạng!', 'error');
-                }
+            const r = new FileReader();
+            r.onload = ev => {
+                const lines = ev.target.result.split(/\r?\n/);
+                if (!lines[0].includes('find,replace,mode')) return notify('CSV sai định dạng!', 'error');
                 let count = 0;
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    // Regex tìm các trường bọc trong dấu nháy kép, cho phép dấu phẩy bên trong
-                    const match = line.match(/^"(.*)","(.*)","(.*)"(?:,(\w+)(?:,(\w+))?)?$/);
-                    if (match) {
-                        const find = match[1].replace(/""/g, '"');
-                        const replace = match[2].replace(/""/g, '"');
-                        const modeName = match[3];
-                        const caseStr = match[4] ? match[4].toUpperCase() : 'FALSE';
-                        const wholeWordStr = match[5] ? match[5].toUpperCase() : 'FALSE';
-
-                        if (!state.modes[modeName]) {
-                            // Tạo mode mới
-                            state.modes[modeName] = { pairs: [], case: false, wholeWord: false };
-                        }
-                        
-                        // Cập nhật setting mode (chỉ dùng setting từ dòng đầu tiên của mode đó)
-                        if (state.modes[modeName].pairs.length === 0) {
-                             state.modes[modeName].case = (caseStr === 'TRUE');
-                             state.modes[modeName].wholeWord = (wholeWordStr === 'TRUE');
-                        }
-
-                        state.modes[modeName].pairs.push({ find, replace });
+                for(let i=1; i<lines.length; i++) {
+                    const m = lines[i].match(/^"(.*)","(.*)","(.*)"$/); // Regex đơn giản cho CSV generated
+                    if (m) {
+                        const [_, f, r, modeName] = m;
+                        if (!state.modes[modeName]) state.modes[modeName] = {pairs:[], matchCase:false, wholeWord:false, autoCaps:false};
+                        state.modes[modeName].pairs.push({find: f.replace(/""/g,'"'), replace: r.replace(/""/g,'"')});
                         count++;
                     }
                 }
-                saveData(); updateModeUI(); notify(`Nhập ${count} dòng!`);
+                saveState(); renderModeUI(); notify(`Đã nhập ${count} dòng.`);
             };
-            reader.readAsText(file);
+            r.readAsText(file);
         };
-        input.click();
+        inp.click();
     };
 
-    // --- MODE & PAIR MANAGEMENT ---
-    els.addPair.onclick = () => { addPairUI('', '', false); els.puncList.querySelector('input').focus(); };
-    els.save.onclick = () => { saveData(); notify(`Đã lưu "${state.activeMode}"`); };
-    els.modeSel.onchange = () => { saveData(); state.activeMode = els.modeSel.value; updateModeUI(); };
-    els.addMode.onclick = () => {
-        const name = prompt('Tên chế độ mới:');
-        if (name && !state.modes[name]) {
-            saveData(); state.modes[name] = { pairs: [], case: false, wholeWord: false }; state.activeMode = name; updateModeUI();
-        }
-    };
-    els.delMode.onclick = () => { if (confirm('Xóa chế độ này?')) { delete state.modes[state.activeMode]; state.activeMode = 'Mặc định'; updateModeUI(); saveData(); } };
-    els.renameMode.onclick = () => {
-        const newName = prompt('Tên mới:', state.activeMode);
-        if (newName && !state.modes[newName]) {
-            state.modes[newName] = state.modes[state.activeMode]; delete state.modes[state.activeMode];
-            state.activeMode = newName; updateModeUI(); saveData();
-        }
-    };
-    // Toggle Match Case
-    els.caseMode.onclick = () => { state.modes[state.activeMode].case = !state.modes[state.activeMode].case; updateModeUI(); };
-    // Toggle Whole Words 
-    els.wholeWordsMode.onclick = () => { state.modes[state.activeMode].wholeWord = !state.modes[state.activeMode].wholeWord; updateModeUI(); };
+    // === 9. EDITOR UTILS ===
+    function updateFont() {
+        els.editor.style.fontFamily = els.fontFamily.value;
+        els.editor.style.fontSize = els.fontSize.value;
+    }
+    els.fontFamily.onchange = updateFont;
+    els.fontSize.onchange = updateFont;
+    
+    function updateWordCount() {
+        const txt = els.editor.innerText || '';
+        const count = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+        els.wordCount.textContent = `Words: ${count}`;
+    }
+    els.editor.addEventListener('input', updateWordCount);
 
-    // Khởi tạo
-    loadData();
+    els.searchBtn.onclick = () => {
+        addKeyword(els.sidebarInput.value); 
+        highlightKeywordsDOM(); 
+        notify('Đã highlight keywords!'); 
+    };
+    els.replaceBtn.onclick = performReplaceAll;
+    els.clearBtn.onclick = () => { 
+        if(confirm('Xóa hết nội dung?')) { 
+            els.editor.innerHTML = ''; 
+            updateWordCount(); 
+        } 
+    };
+    els.copyBtn.onclick = () => {
+        if (!els.editor.innerText.trim()) return notify('Trống!', 'error');
+        navigator.clipboard.writeText(els.editor.innerText);
+        notify('Đã sao chép!');
+    };
+
+    // === INIT ===
+    renderTags();
+    renderModeUI();
     updateFont();
 });

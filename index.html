@@ -47,18 +47,18 @@
         <div class="editor-footer">
             <div id="word-count-display" class="badge">Words: 0</div>
             <div id="editor-actions" class="footer-actions">
-                <button id="search" class="btn btn-toggle">Highlight Keywords</button>
-                <button id="clear" class="btn btn-toggle">Xóa Trắng</button>
-                <button id="copy-editor-content" class="btn btn-toggle">Copy Result</button>
-                <button id="replace-all" class="btn btn-toggle">Thực Hiện Thay Thế</button>
+                <button id="search" class="btn btn-teal">Highlight Keywords</button>
+                <button id="clear" class="btn btn-teal">Xóa Trắng</button>
+                <button id="copy-editor-content" class="btn btn-teal">Copy Result</button>
+                <button id="replace-all" class="btn btn-teal">Thực Hiện Thay Thế</button>
             </div>
         </div>
       </div>
 
-      <div id="keywords-sidebar" class="sidebar">
+      <div id="keywords-sidebar" class="sidebar closed">
         <div class="sidebar-header">
             <h3>Quick Keywords</h3>
-            </div>
+        </div>
         <div class="sidebar-content custom-scrollbar">
             <div class="mb-3">
                 <input type="text" id="sidebar-input" placeholder="Nhập từ khóa..." class="sidebar-input">
@@ -113,8 +113,8 @@
                 <h2>Cài Đặt Hiển Thị & Keywords</h2>
             </div>
             
-            <div class="keywords-panel p-4">
-                <div class="keywords-controls-row">
+            <div class="toolbar">
+                <div class="toolbar-group">
                     <div class="control-group">
                         <label>Font:</label>
                         <select id="fontFamily" class="input-sm">
@@ -133,19 +133,19 @@
                             <option value="24px">24</option>
                         </select>
                     </div>
-                    
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="kw-match-case"> Phân biệt hoa thường
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="kw-whole-word"> Từ hoàn chỉnh
-                    </label>
                 </div>
+                
+                <div class="toolbar-group">
+                    <button id="kw-match-case-btn" class="btn btn-toggle">Match Case: Tắt</button>
+                    <button id="kw-whole-word-btn" class="btn btn-toggle">Whole Word: Tắt</button>
+                </div>
+            </div>
 
-                <div class="keywords-input-area mt-4">
-                    <input type="text" id="full-keywords-input" placeholder="Nhập từ khóa highlight (Enter hoặc phẩy)..." class="w-full p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none">
-                    <p class="text-xs text-gray-500 mt-1 mb-2">Danh sách từ khóa (Highlight đa sắc):</p>
-                    <div id="full-keywords-tags" class="tags-container border p-2 min-h-[100px] bg-white rounded"></div>
+            <div class="keywords-panel p-4">
+                <div class="keywords-input-area">
+                    <h4 class="input-label">Danh sách Keywords</h4>
+                    <input type="text" id="full-keywords-input" placeholder="Nhập từ khóa highlight (Enter hoặc phẩy)..." class="w-full-input">
+                    <div id="full-keywords-tags" class="tags-container border p-2 min-h-[100px] bg-white rounded mt-2"></div>
                 </div>
             </div>
         </div>

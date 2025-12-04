@@ -17,19 +17,20 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* === HEADER (Style Tham Khảo) === */
+/* === HEADER (Yêu cầu 1) === */
 .app-header {
   background: white; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 60px;
   display: flex; justify-content: space-between; align-items: center;
   flex-shrink: 0; z-index: 100;
 }
-.header-left { flex: 1; min-width: 250px; }
-.header-right { flex: 0.5; display: flex; justify-content: flex-end; }
-.header-center { flex: 2; display: flex; justify-content: center; height: 100%; }
+/* Tăng độ rộng bên trái để chứa đủ dòng donate */
+.header-left { flex: 0 0 350px; } 
+.header-right { flex: 0 0 50px; display: flex; justify-content: flex-end; }
+.header-center { flex: 1; display: flex; justify-content: center; height: 100%; }
 .header-left h1 { margin: 0; font-size: 16px; color: #111827; font-weight: 700; margin-bottom: 4px; }
 
 /* DONATE STYLES */
-.donate-info { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+.donate-info { font-size: 11px; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 .donate-label {
     background: #dc2626; color: white; padding: 2px 6px; border-radius: 4px;
     font-weight: 800; font-size: 10px; animation: pulse-red 2s infinite;
@@ -51,26 +52,73 @@ body {
 }
 .tab-button:hover { color: #2563eb; background: #f9fafb; }
 .tab-button.active { color: #2563eb; border-bottom-color: #2563eb; background: linear-gradient(to top, #eff6ff, transparent); }
-.tab-content { display: none; }
+
+/* === MAIN LAYOUT & EDITOR === */
+#app-body { flex: 1; overflow: hidden; position: relative; display: flex; }
+.tab-content { display: none; width: 100%; height: 100%; }
 .tab-content.active { display: flex; }
 
-/* === SIDEBAR TRANSITION === */
-#keywords-sidebar {
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-}
-#keywords-sidebar.closed {
-    width: 0 !important;
-    padding: 0 !important;
-    border-left: none;
-}
-.sidebar-toggle-btn {
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-    border-radius: 4px; cursor: pointer; background: #f3f4f6; transition: 0.2s;
-}
-.sidebar-toggle-btn:hover { background: #e5e7eb; }
+.main-layout { flex-direction: row; }
+.editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s; }
+.editor-wrapper { flex: 1; background: white; position: relative; overflow: hidden; }
+#editor { width: 100%; height: 100%; padding: 20px; outline: none; overflow-y: auto; font-size: 16px; line-height: 1.8; color: #333; }
+#editor:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
 
-/* === BUTTONS === */
+/* FOOTER (Yêu cầu 9) */
+.editor-footer {
+    padding: 10px 15px; border-top: 1px solid #e5e7eb; background: #f9fafb;
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+}
+.footer-actions { display: flex; gap: 8px; }
+
+/* BADGE (Yêu cầu 7) */
+.badge { 
+  background: #1abc9c; color: white; padding: 3px 10px; border-radius: 12px; 
+  font-size: 11px; font-weight: 600; box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3);
+}
+
+/* === SIDEBAR === */
+.sidebar {
+    width: 20%; background: white; border-left: 1px solid #e5e7eb;
+    display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0; overflow: hidden;
+}
+.sidebar.closed { width: 0 !important; border: none; }
+.sidebar-header { padding: 12px 15px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+.sidebar-header h3 { margin: 0; font-size: 13px; font-weight: 700; color: #374151; }
+.sidebar-content { padding: 15px; flex: 1; overflow-y: auto; }
+.sidebar-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
+.sidebar-input:focus { border-color: #2563eb; }
+
+.sidebar-toggle-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer; background: #f3f4f6; border: none; font-size: 18px; color: #6b7280;
+}
+.sidebar-toggle-btn:hover { background: #e5e7eb; color: #111827; }
+
+/* === SETTINGS & KEYWORDS TAB STYLES (Yêu cầu 3) === */
+.settings-layout { flex-direction: column; background: #f3f4f6; padding: 15px; overflow-y: auto; }
+.panel-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+.panel-header { padding: 15px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+.panel-header h2 { margin: 0; font-size: 16px; color: #111827; font-weight: 700; }
+
+.mode-actions { display: flex; gap: 8px; align-items: center; }
+.select-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-right: 10px; }
+#mode-select { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
+
+.toolbar { padding: 10px 20px; background: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
+.toolbar-group { display: flex; gap: 8px; }
+.list-actions { padding: 10px 20px; display: flex; gap: 10px; }
+.scroll-area { padding: 10px 20px; background: #f9fafb; min-height: 200px; }
+
+/* KEYWORDS CONTROLS ROW (Yêu cầu 6) */
+.keywords-controls-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.control-group { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #555; }
+.input-sm { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
+.checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
+.checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+
+/* === BUTTONS (Yêu cầu 8 - Style giống reference) === */
 .btn {
   padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer;
   font-size: 12px; font-weight: 600; transition: all 0.2s;
@@ -86,63 +134,51 @@ body {
 .btn-warning { background: #f59e0b; color: white; }
 .btn-outline { background: white; border: 1px solid #d1d5db; color: #374151; }
 .btn-outline:hover { border-color: #9ca3af; background: #f9fafb; }
+.icon-btn { min-width: 120px; }
+
+/* Toggle Button Style */
 .btn-toggle { 
   background: #e5e7eb; color: #6b7280; 
-  padding: 10px 15px; border-radius: 6px; font-size: 12px; font-weight: 700;
-  transition: all 0.2s;
+  padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 700;
+  border: 1px solid transparent;
 }
-.btn-toggle.active { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-.action-btn {
-    color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: 0.2s;
-}
+.btn-toggle:hover { background: #d1d5db; color: #374151; }
+.btn-toggle.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
 
-/* === EDITOR & HIGHLIGHTS === */
-#editor {
-    font-size: 16px; line-height: 1.8; color: #333;
-    white-space: pre-wrap; word-wrap: break-word;
+/* === ITEMS & TAGS === */
+.punctuation-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #e5e7eb; }
+.punctuation-item input { flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; outline: none; }
+.punctuation-item input:focus { border-color: #2563eb; }
+.punctuation-item button.remove { width: 28px; height: 28px; border-radius: 4px; border: none; background: #fee2e2; color: #dc2626; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+.punctuation-item button.remove:hover { background: #ef4444; color: white; }
+.empty-message { text-align: center; color: #9ca3af; padding: 20px; font-size: 13px; }
+
+.tags-container { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+    background: #eff6ff; color: #1e40af; padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #93c5fd;
 }
-#editor:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
+.tag .remove-tag { cursor: pointer; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.tag .remove-tag:hover { background: #dbeafe; color: red; }
 
 /* HIGHLIGHT COLORS */
 .hl-yellow { background-color: #fde047; color: #000; border-bottom: 2px solid #eab308; border-radius: 2px; padding: 0 1px; }
 .hl-blue { background-color: #93c5fd; color: #000; border-bottom: 2px solid #2563eb; border-radius: 2px; padding: 0 1px; }
-
-/* Keywords colors */
-.keyword { border-radius: 3px; padding: 0 2px; font-weight: 600; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.keyword { border-radius: 3px; padding: 0 2px; font-weight: 600; }
 .hl-pink   { background-color: #f9a8d4; border-bottom: 2px solid #db2777; }
 .hl-green  { background-color: #86efac; border-bottom: 2px solid #16a34a; }
 .hl-orange { background-color: #fdba74; border-bottom: 2px solid #ea580c; }
 .hl-purple { background-color: #d8b4fe; border-bottom: 2px solid #9333ea; }
 .hl-red    { background-color: #fca5a5; border-bottom: 2px solid #dc2626; }
 
-/* TAGS */
-.tag {
-    background: #eff6ff; color: #1e40af; padding: 4px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
-    border: 1px solid #93c5fd; margin-bottom: 4px;
+/* === NOTIFICATION (Yêu cầu 10) === */
+#notification-container { 
+    position: fixed; 
+    top: 70px; /* Bắt đầu dưới header (60px header + 10px padding) */
+    right: 20px; 
+    z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; 
 }
-.tag .remove-tag { cursor: pointer; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.tag .remove-tag:hover { background: #dbeafe; color: red; }
-
-/* === SETTINGS PANEL === */
-.panel-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-width: 1000px; width: 100%; display: flex; flex-direction: column; }
-.panel-header { padding: 15px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
-.panel-header h2 { margin: 0; font-size: 16px; color: #111827; font-weight: 700; }
-.mode-actions { display: flex; gap: 8px; align-items: center; }
-.select-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-right: 10px; }
-#mode-select { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; outline: none; }
-.toolbar { padding: 10px 20px; background: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; gap: 10px; }
-.toolbar-group { display: flex; gap: 8px; }
-
-.punctuation-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 6px; border: 1px solid #e5e7eb; border-radius: 6px; }
-.punctuation-item input { flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; outline: none; }
-.punctuation-item input:focus { border-color: #2563eb; }
-.punctuation-item button.remove { width: 28px; height: 28px; border-radius: 4px; border: none; background: #fee2e2; color: #dc2626; cursor: pointer; }
-.punctuation-item button.remove:hover { background: #ef4444; color: white; }
-
-/* === NOTIFICATION === */
-#notification-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .notification {
     padding: 12px 20px; border-radius: 6px; color: white; font-size: 13px; font-weight: 600;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: slideIn 0.3s ease-out; display: flex; align-items: center;
@@ -153,3 +189,8 @@ body {
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: 0; opacity: 1; } }
 
 .hidden { display: none !important; }
+.w-full { width: 100%; }
+.mt-4 { margin-top: 1rem; }
+.p-2 { padding: 0.5rem; }
+.border { border-width: 1px; }
+.rounded { border-radius: 0.25rem; }

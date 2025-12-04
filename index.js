@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === CONFIG & STATE ===
-    const STORAGE_KEY = 'trinh_hg_pro_v18_final';
+    const STORAGE_KEY = 'trinh_hg_pro_v19_final';
     
     // Markers
     const MARK_REP_START = '\uE000';
@@ -8,14 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const MARK_CAP_START = '\uE002';
     const MARK_CAP_END = '\uE003';
     
-    // Keyword Colors
-    const KW_COLORS = ['hl-pink', 'hl-blue', 'hl-green', 'hl-orange', 'hl-purple', 'hl-red'];
+    // Yêu cầu 5: Keyword Colors (Loại bỏ Vàng và Xanh Dương)
+    const KW_COLORS = ['hl-pink', 'hl-green', 'hl-orange', 'hl-purple', 'hl-red'];
 
     const defaultState = {
         keywords: [],
-        keywordSettings: { matchCase: false, wholeWord: false }, // Thêm setting riêng cho Keyword
+        keywordSettings: { matchCase: false, wholeWord: false },
         activeMode: 'Mặc định',
-        sidebarOpen: true,
+        sidebarOpen: false, // Yêu cầu 6: Mặc định đóng
         modes: {
             'Mặc định': { pairs: [], matchCase: false, wholeWord: false, autoCaps: false }
         }
@@ -63,11 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
         importBtn: document.getElementById('import-csv'),
         exportBtn: document.getElementById('export-csv'),
         
-        // Keywords Tab Controls (Yêu cầu 5, 6)
+        // Keywords Tab Controls
         fontFamily: document.getElementById('fontFamily'),
         fontSize: document.getElementById('fontSize'),
-        kwMatchCase: document.getElementById('kw-match-case'), // Checkbox mới
-        kwWholeWord: document.getElementById('kw-whole-word'), // Checkbox mới
+        // Yêu cầu 2: Nút toggle thay vì checkbox
+        kwMatchCaseBtn: document.getElementById('kw-match-case-btn'),
+        kwWholeWordBtn: document.getElementById('kw-whole-word-btn'),
         fullKwInput: document.getElementById('full-keywords-input'),
         fullKwTags: document.getElementById('full-keywords-tags'),
         
@@ -101,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Sidebar Toggle logic
-        if (tabId === 'main-tab') {
+        // Yêu cầu 7: Toggle Sidebar hiện ở tab Nội dung và Cài đặt
+        if (tabId === 'main-tab' || tabId === 'settings-tab') {
             els.sidebarToggle.classList.remove('hidden');
         } else {
             els.sidebarToggle.classList.add('hidden');
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     }
     els.sidebarToggle.onclick = () => toggleSidebar();
+    // Init state based on saved value (Yêu cầu 6: Default closed handled in defaultState)
     toggleSidebar(state.sidebarOpen);
 
     // --- HELPERS ---
@@ -206,12 +208,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = 0; i < processedText.length; i++) {
                     const c = processedText[i];
                     if (c === MARK_REP_START) {
+                        // Yêu cầu 5: Replace = Yellow
                         finalHTML += escapeHTML(buffer) + '<span class="hl-yellow" contenteditable="false">';
                         buffer = '';
                     } else if (c === MARK_REP_END) {
                         finalHTML += escapeHTML(buffer) + '</span>&#8203;';
                         buffer = '';
                     } else if (c === MARK_CAP_START) {
+                        // Yêu cầu 5: Auto Caps = Blue
                         finalHTML += escapeHTML(buffer) + '<span class="hl-blue" contenteditable="false">';
                         buffer = '';
                     } else if (c === MARK_CAP_END) {
@@ -225,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 els.editor.innerHTML = finalHTML;
                 
-                // Highlight keywords sau replace (Dùng settings của keywords)
+                // Highlight keywords sau replace
                 if (state.keywords.length > 0) highlightKeywordsDOM();
 
                 updateWordCount();
@@ -243,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     }
 
-    // === HIGHLIGHT KEYWORDS LOGIC (Dùng Settings Riêng - Yêu cầu 5) ===
+    // === HIGHLIGHT KEYWORDS LOGIC ===
     function highlightKeywordsDOM() {
         const oldKws = els.editor.querySelectorAll('.keyword');
         oldKws.forEach(span => {
@@ -264,8 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const sortedKws = [...state.keywords].sort((a,b) => b.length - a.length);
-        
-        // Sử dụng setting riêng của Keyword
         const matchCase = state.keywordSettings.matchCase;
         const wholeWord = state.keywordSettings.wholeWord;
         let wordCharRegex = /[\p{L}\p{N}_]/u;
@@ -301,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matchNode = currentNode.splitText(bestIdx);
                 const afterNode = matchNode.splitText(bestKw.length);
                 
+                // Yêu cầu 5: Keyword highlight (random colors, no blue/yellow)
                 const span = document.createElement('span');
                 span.className = `keyword ${KW_COLORS[colorIdx % KW_COLORS.length]}`;
                 span.textContent = matchNode.nodeValue;
@@ -315,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // === KEYWORDS MANAGEMENT & UI ===
+    // === KEYWORDS MANAGEMENT ===
     function addKeyword(val) {
         if (!val.trim()) return;
         const keys = val.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
@@ -379,12 +382,12 @@ document.addEventListener('DOMContentLoaded', () => {
         els.deleteModeBtn.classList.toggle('hidden', isDef);
     }
 
+    // Yêu cầu 10: Xóa mũi tên
     function addPairUI(f = '', r = '') {
         const div = document.createElement('div');
         div.className = 'punctuation-item';
         div.innerHTML = `
             <input type="text" class="find" placeholder="Tìm" value="${escapeHTML(f)}">
-            <span class="text-gray-400">→</span>
             <input type="text" class="replace" placeholder="Thay" value="${escapeHTML(r)}">
             <button class="remove" tabindex="-1">×</button>
         `;
@@ -461,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inp.click();
     };
 
-    // === DISPLAY & KEYWORD SETTINGS HANDLERS (Yêu cầu 5, 6) ===
+    // === DISPLAY & KEYWORD SETTINGS HANDLERS ===
     function updateFont() {
         els.editor.style.fontFamily = els.fontFamily.value;
         els.editor.style.fontSize = els.fontSize.value;
@@ -469,19 +472,27 @@ document.addEventListener('DOMContentLoaded', () => {
     els.fontFamily.onchange = updateFont;
     els.fontSize.onchange = updateFont;
     
-    // Checkbox Keywords Handler
-    function updateKwSettings() {
-        state.keywordSettings.matchCase = els.kwMatchCase.checked;
-        state.keywordSettings.wholeWord = els.kwWholeWord.checked;
-        saveState();
-        highlightKeywordsDOM();
+    // Yêu cầu 2: Keyword Buttons UI Handler
+    function updateKwUI() {
+        els.kwMatchCaseBtn.textContent = `Match Case: ${state.keywordSettings.matchCase ? 'BẬT' : 'Tắt'}`;
+        els.kwMatchCaseBtn.classList.toggle('active', state.keywordSettings.matchCase);
+        
+        els.kwWholeWordBtn.textContent = `Whole Word: ${state.keywordSettings.wholeWord ? 'BẬT' : 'Tắt'}`;
+        els.kwWholeWordBtn.classList.toggle('active', state.keywordSettings.wholeWord);
     }
-    els.kwMatchCase.onchange = updateKwSettings;
-    els.kwWholeWord.onchange = updateKwSettings;
 
-    // Load initial settings UI for Keywords
-    els.kwMatchCase.checked = state.keywordSettings.matchCase;
-    els.kwWholeWord.checked = state.keywordSettings.wholeWord;
+    // Toggle Handlers
+    els.kwMatchCaseBtn.onclick = () => {
+        state.keywordSettings.matchCase = !state.keywordSettings.matchCase;
+        saveState(); updateKwUI(); highlightKeywordsDOM();
+    };
+    els.kwWholeWordBtn.onclick = () => {
+        state.keywordSettings.wholeWord = !state.keywordSettings.wholeWord;
+        saveState(); updateKwUI(); highlightKeywordsDOM();
+    };
+    
+    // Load initial UI for Keywords
+    updateKwUI();
 
     // === EDITOR ACTIONS ===
     function updateWordCount() {

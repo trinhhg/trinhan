@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tiện Ích Của Trịnh Hg - Pro Version Final Patched</title>
+  <title>Tiện Ích Của Trịnh Hg - Pro Version V30</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
 </head>
-<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
+<body class="custom-scrollbar">
 
   <header class="app-header">
     <div class="header-left">
@@ -26,7 +26,7 @@
     </div>
     <div class="header-right">
       <button id="header-sidebar-toggle" class="sidebar-toggle-btn" title="Mở/Đóng Sidebar Keywords">
-        <span class="icon">«</span>
+          <span class="icon">«</span>
       </button>
     </div>
   </header>
@@ -36,19 +36,23 @@
     <div id="content-wrapper">
 
         <div id="main-tab" class="tab-content active main-layout">
-            <div id="central-area" class="editor-area">
+            <div class="editor-area">
                 <div id="editor-wrapper" class="editor-wrapper">
-                    <div id="editor" 
-                         contenteditable="true" 
-                         spellcheck="false" 
-                         class="custom-scrollbar"
-                         data-placeholder="Dán văn bản vào đây..."></div>
+                    <div class="layer-container">
+                        <div id="highlight-layer" aria-hidden="true" class="highlight-layer"></div>
+                        
+                        <textarea 
+                            id="editor-input" 
+                            spellcheck="false" 
+                            class="editor-input"
+                            placeholder="Dán văn bản vào đây..."></textarea>
+                    </div>
                 </div>
                 
                 <div class="editor-footer">
                     <div id="word-count-display" class="badge">Words: 0</div>
-                    <div id="editor-actions" class="footer-actions">
-                        <button id="search" class="btn btn-teal">Highlight Keywords Only</button>
+                    <div class="footer-actions">
+                        <button id="search" class="btn btn-teal">Tính toán lại Highlight</button>
                         <button id="clear" class="btn btn-teal">Xóa Trắng</button>
                         <button id="copy-editor-content" class="btn btn-teal">Copy Result & Clear</button>
                         <button id="replace-all" class="btn btn-teal">Thực Hiện Thay Thế</button>
@@ -66,21 +70,22 @@
                       <label>Chế độ:</label>
                       <select id="mode-select"></select>
                    </div>
-                   <button id="add-mode" class="btn btn-primary">+ Mới</button>
-                   <button id="rename-mode" class="btn btn-warning hidden">Đổi Tên</button>
-                   <button id="delete-mode" class="btn btn-danger hidden">Xóa</button>
+                   <button id="add-mode" class="btn btn-primary" title="Thêm chế độ mới">+ Mới</button>
+                   <button id="rename-mode" class="btn btn-warning hidden" title="Đổi tên chế độ hiện tại">Đổi Tên</button>
+                   <button id="delete-mode" class="btn btn-danger hidden" title="Xóa chế độ hiện tại">Xóa</button>
                 </div>
               </div>
 
               <div class="toolbar">
                 <div class="toolbar-group">
-                    <button id="match-case-btn" class="btn btn-toggle">Match Case: Tắt</button>
-                    <button id="whole-word-btn" class="btn btn-toggle">Whole Word: Tắt</button>
-                    <button id="auto-caps-btn" class="btn btn-toggle">Auto Caps: Tắt</button>
+                    <button id="match-case-btn" class="btn btn-toggle"></button>
+                    <button id="whole-word-btn" class="btn btn-toggle"></button>
+                    <button id="auto-caps-btn" class="btn btn-toggle"></button>
                 </div>
                 <div class="toolbar-group">
                     <button id="import-replace-csv" class="btn btn-action">Nhập CSV</button>
                     <button id="export-replace-csv" class="btn btn-action">Xuất CSV</button>
+                    <input type="file" id="csv-file-input" accept=".csv" class="hidden">
                 </div>
               </div>
               
@@ -89,7 +94,7 @@
                   <button id="save-settings" class="btn btn-primary icon-btn">Lưu tất cả</button>
               </div>
 
-              <div class="scroll-area">
+              <div class="scroll-area custom-scrollbar">
                 <div id="punctuation-list"></div>
                 <div id="empty-state" class="empty-message hidden">Chưa có cặp thay thế nào.</div>
               </div>
@@ -104,43 +109,46 @@
                 
                 <div class="toolbar">
                     <div class="toolbar-group">
-                        <button id="kw-match-case-btn" class="btn btn-toggle">Match Case: Tắt</button>
-                        <button id="kw-whole-word-btn" class="btn btn-toggle">Whole Word: Tắt</button>
+                        <button id="kw-match-case-btn" class="btn btn-toggle"></button>
+                        <button id="kw-whole-word-btn" class="btn btn-toggle"></button>
                     </div>
 
                     <div class="toolbar-group">
-                        <button id="import-kw-csv" class="btn btn-action">Nhập Keywords</button>
-                        <button id="export-kw-csv" class="btn btn-action">Xuất Keywords</button>
+                        <button id="copy-kw-csv" class="btn btn-action">Copy Keywords</button>
                     </div>
 
                     <div class="toolbar-group">
                         <div class="control-group">
                             <label>Font:</label>
                             <select id="fontFamily" class="input-sm">
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
                                 <option value="Arial, sans-serif">Arial</option>
-                                <option value="'Montserrat', sans-serif" selected>Montserrat</option>
                                 <option value="'Times New Roman', serif">Times New Roman</option>
                             </select>
                         </div>
                         <div class="control-group">
                             <label>Size:</label>
                             <select id="fontSize" class="input-sm">
-                                <option value="14px">14</option>
-                                <option value="16px" selected>16</option>
-                                <option value="18px">18</option>
-                                <option value="20px">20</option>
-                                <option value="24px">24</option>
-                                <option value="28px">28</option>
+                                <option value="14px">14px</option>
+                                <option value="16px">16px</option>
+                                <option value="18px">18px</option>
+                                <option value="20px">20px</option>
+                                <option value="24px">24px</option>
+                                <option value="28px">28px</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="keywords-panel p-4">
+                <div class="keywords-panel">
                     <div class="keywords-input-area">
                         <h4 class="input-label">Danh sách Keywords</h4>
-                        <input type="text" id="full-keywords-input" placeholder="Nhập từ khóa highlight (Enter hoặc phẩy)..." class="w-full-input">
-                        <div id="full-keywords-tags" class="tags-container border p-2 min-h-[100px] bg-white rounded mt-2"></div>
+                        <div class="input-group">
+                            <input type="text" id="full-keywords-input" placeholder="Nhập từ khóa highlight (Enter hoặc phẩy)..." class="w-full-input">
+                            <button id="add-kw-btn" class="btn btn-blue-toolbar" title="Thêm">+</button>
+                            <button id="delete-all-kw-btn" class="btn btn-red-toolbar" title="Xóa tất cả">🗑</button>
+                        </div>
+                        <div id="full-keywords-tags" class="tags-container"></div>
                     </div>
                 </div>
             </div>
@@ -153,13 +161,14 @@
         </div>
         <div class="sidebar-content custom-scrollbar">
             <div class="mb-3">
-                <input type="text" id="sidebar-input" placeholder="Nhập từ khóa..." class="sidebar-input">
+                <input type="text" id="sidebar-input" placeholder="Nhập từ khóa (Click ra ngoài để thêm)..." class="sidebar-input">
             </div>
             <div id="sidebar-tags" class="tags-container"></div>
         </div>
     </div>
 
-  </div> <div id="notification-container"></div>
+  </div> 
+  <div id="notification-container"></div>
   <script src="index.js"></script>
 </body>
 </html>
